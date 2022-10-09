@@ -3,6 +3,7 @@ import type { NextPage } from 'next';
 import HeroSection from '@/pageComponents/Home/HeroSection';
 import PageHead from 'components/components';
 import CourseSection from '@/pageComponents/Home/CourseSection';
+import Footer from '@/pageComponents/Home/Footer';
 
 const Home: NextPage = () => {
     return (
@@ -11,6 +12,7 @@ const Home: NextPage = () => {
             <section className="bg-black courseplug-container">
                 <HeroSection />
                 <CourseSection />
+                <Footer />
             </section>
         </>
     );
