@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https: //fonts.googleapis.com/css?family=Cinzel:regular,500,600,700,800,900');
+
+*{
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+
+}
+
+@layer components {
+    .courseplug-container {
+         @apply container sm:container md:container lg:container xl:container !mx-auto py-4;
+        }
+    .cp-heading{
+        @apply !text-2xl lg:!text-5xl !tracking-normal !leading-loose 
+    }
+    .cp-text{
+        @apply !text-white !leading-relaxed !text-sm md:!text-base !tracking-wide
+    }
+}
+
