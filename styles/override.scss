@@ -8,3 +8,11 @@
     font-family: Cinzel, Montserrat;
     @include text-linear();
 }
+::-webkit-scrollbar {
+    width: 0.5rem;
+    background-color: #000;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #ffcd74;
+}
