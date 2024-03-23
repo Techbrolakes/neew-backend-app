@@ -1,32 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
+    "module": "commonjs",
     "esModuleInterop": true,
-    "module": "esnext",
+    "allowSyntheticDefaultImports": true,
+    "target": "es2021",
+    "noImplicitAny": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
+    "sourceMap": true,
+    "outDir": "dist",
     "baseUrl": ".",
-    "paths": {
-      "@/common/*": ["components/common/*"],
-      "@/layouts/*": ["components/layouts/*"],
-      "@/pageComponents/*": ["components/pageComponents/*"],
-      "@/services/*": ["config/services/*"],
-      "@pages/*": ["pages/*"],
-      "@config/*": ["config/*"],
-      "@logger": ["logger.config"],
-      "@tests/*": ["__tests__/*"],
-      "@mocks/*": ["__mocks__/*"],
-    }
+    "paths": {},
+    "allowJs": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"]
 }
