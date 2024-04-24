@@ -9,8 +9,10 @@
     "sourceMap": true,
     "outDir": "dist",
     "baseUrl": ".",
-    "paths": {},
+    "paths": {
+      "*": ["node_modules/*", "source/types/*"]
+    },
     "allowJs": true
   },
-  "include": ["src/**/*"]
+  "include": ["source/**/*"]
 }
