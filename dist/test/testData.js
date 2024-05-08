@@ -5,6 +5,10 @@ const data = {
         doc: undefined,
         token: "",
     },
+    userDavid: {
+        doc: undefined,
+        token: "",
+    },
 };
 exports.default = data;
 //# sourceMappingURL=testData.js.map

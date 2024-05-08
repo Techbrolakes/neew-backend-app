@@ -1,4 +1,31 @@
+import debug from "debug";
+import jwt from "jsonwebtoken";
+
 // Objective: Implement utility functions for the application
+
+export function throwIfUndefined<T>(x: T | undefined, name?: string): T {
+  if (x === undefined) {
+    throw new Error(`${name} must not be undefined`);
+  }
+  return x;
+}
+
+// =====================================================================================================
+/** Generate and sign a user Token */
+export async function generateToken(data: any) {
+  return new Promise((resolve, _reject) => {
+    const signOptions: any = {};
+    signOptions.expiresIn = "365d";
+
+    jwt.sign(data, "neew", signOptions, (err: any, token: any) => {
+      if (err) {
+        debug(err.message);
+      }
+
+      resolve(token);
+    });
+  });
+}
 
 // =====================================================================================================
 type searchUtilType = {

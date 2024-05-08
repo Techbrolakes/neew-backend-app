@@ -5,12 +5,63 @@ import { validateResult } from "../../middleware/validator.mw";
 import { body } from "express-validator";
 import ResponseHandler from "../../utils/response-handler";
 import { HTTP_CODES } from "../../constants/appDefaults.constant";
+import bcrypt from "bcrypt";
+import { generateToken } from "../../utils";
 
-const debug = Debug("neew:user.service");
+const debug = Debug("project:user.service");
+
+const login = [
+  body("email").isEmail().withMessage("Invalid email"),
+  body("password").isString().exists().withMessage("Invalid password"),
+  validateResult,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const user = await UserCore.getByEmail(req.body.email);
+
+      if (!user) {
+        return ResponseHandler.sendErrorResponse({
+          res,
+          code: HTTP_CODES.NOT_FOUND,
+          error: "User does not exist",
+        });
+      }
+
+      // Compare the passwords
+      const result = bcrypt.compareSync(req.body.password, user?.password!);
+      if (!result) {
+        return ResponseHandler.sendErrorResponse({
+          res,
+          code: HTTP_CODES.BAD_REQUEST,
+          error: "Invalid Password! Please input the correct one.",
+        });
+      }
+
+      const token = await generateToken({
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+
+      return ResponseHandler.sendSuccessResponse({
+        res,
+        code: HTTP_CODES.OK,
+        message: "Login successful",
+        data: { ...user, token },
+      });
+    } catch (error: any) {
+      return ResponseHandler.sendErrorResponse({
+        res,
+        code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+        error: `${error}`,
+      });
+    }
+  },
+];
 
 const register = [
-  body("email").isEmail(),
-  body("firstName").isString(),
+  body("email").isEmail().withMessage("Invalid email"),
+  body("firstName").isString().withMessage("Invalid first name"),
   body("lastName").isString(),
   body("password").isString(),
   body("interest").isString(),
@@ -112,4 +163,5 @@ const register = [
 
 export default {
   register,
+  login,
 };

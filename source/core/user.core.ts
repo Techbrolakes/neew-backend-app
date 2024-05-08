@@ -103,10 +103,10 @@ async function create({
   usp,
 }: IUser): Promise<IUserDocument> {
   const data = {
-    email,
-    firstName,
+    email: email.trim().toLowerCase(),
+    firstName: firstName.trim().toLocaleLowerCase(),
     interest,
-    lastName,
+    lastName: lastName.trim().toLocaleLowerCase(),
     location,
     password,
     telephone,

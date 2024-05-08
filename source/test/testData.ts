@@ -5,6 +5,10 @@ const data = {
     doc: undefined as IUserDocument | undefined,
     token: "",
   },
+  userDavid: {
+    doc: undefined as IUserDocument | undefined,
+    token: "",
+  },
 };
 
 export default data;

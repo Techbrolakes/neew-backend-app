@@ -1,7 +1,34 @@
 "use strict";
-// Objective: Implement utility functions for the application
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertDate = exports.timeUtil = exports.paginationUtil = exports.searchUtil = void 0;
+exports.convertDate = exports.timeUtil = exports.paginationUtil = exports.searchUtil = exports.generateToken = exports.throwIfUndefined = void 0;
+const debug_1 = __importDefault(require("debug"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+// Objective: Implement utility functions for the application
+function throwIfUndefined(x, name) {
+    if (x === undefined) {
+        throw new Error(`${name} must not be undefined`);
+    }
+    return x;
+}
+exports.throwIfUndefined = throwIfUndefined;
+// =====================================================================================================
+/** Generate and sign a user Token */
+async function generateToken(data) {
+    return new Promise((resolve, _reject) => {
+        const signOptions = {};
+        signOptions.expiresIn = "365d";
+        jsonwebtoken_1.default.sign(data, "neew", signOptions, (err, token) => {
+            if (err) {
+                (0, debug_1.default)(err.message);
+            }
+            resolve(token);
+        });
+    });
+}
+exports.generateToken = generateToken;
 function searchUtil({ search, searchArray }) {
     let searchQuery;
     if (search !== "undefined" && Object.keys(search).length > 0) {

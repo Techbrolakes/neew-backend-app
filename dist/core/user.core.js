@@ -60,10 +60,10 @@ async function getAll(req) {
 }
 async function create({ email, firstName, interest, lastName, location, password, telephone, website, communityImpact, foundingYear, industry, locationOfRegistration, networkWants, operatingAddress, photo, revenue, sdgImpact, traction, productMaturity, growthTrend, exitFounder, exitStrategy, exitTimeFrame, exitMethod, forecastedEbitda, founderValuation, founderValuationLogic, companyName, companyLogo, ebitda, usp, }) {
     const data = {
-        email,
-        firstName,
+        email: email.trim().toLowerCase(),
+        firstName: firstName.trim().toLocaleLowerCase(),
         interest,
-        lastName,
+        lastName: lastName.trim().toLocaleLowerCase(),
         location,
         password,
         telephone,

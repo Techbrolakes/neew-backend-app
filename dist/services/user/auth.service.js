@@ -11,7 +11,7 @@ const response_handler_1 = __importDefault(require("../../utils/response-handler
 const appDefaults_constant_1 = require("../../constants/appDefaults.constant");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const utils_1 = require("../../utils");
-const debug = (0, debug_1.default)("neew:user.service");
+const debug = (0, debug_1.default)("project:user.service");
 const login = [
     (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email"),
     (0, express_validator_1.body)("password").isString().exists().withMessage("Invalid password"),
@@ -45,7 +45,7 @@ const login = [
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
                 message: "Login successful",
-                data: { user, token },
+                data: { ...user, token },
             });
         }
         catch (error) {
@@ -58,8 +58,8 @@ const login = [
     },
 ];
 const register = [
-    (0, express_validator_1.body)("email").isEmail(),
-    (0, express_validator_1.body)("firstName").isString(),
+    (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email"),
+    (0, express_validator_1.body)("firstName").isString().withMessage("Invalid first name"),
     (0, express_validator_1.body)("lastName").isString(),
     (0, express_validator_1.body)("password").isString(),
     (0, express_validator_1.body)("interest").isString(),
@@ -160,4 +160,4 @@ exports.default = {
     register,
     login,
 };
-//# sourceMappingURL=user.service.js.map
+//# sourceMappingURL=auth.service.js.map
