@@ -6,8 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = __importDefault(require("path"));
 const config = {
     env: "test",
-    database: "mongodb://127.0.0.1:27017/neew-app-database",
-    databaseName: "neew-app-database",
+    database: "mongodb://127.0.0.1:27017/neew-database",
+    databaseName: "neew-database",
     frontUrl: "http://localhost:3000",
     imageFolder: path_1.default.join(__dirname, "..", // src
     "..", // root

@@ -4,7 +4,6 @@ export interface IUser {
   email: string;
   firstName: string;
   lastName: string;
-  createdAt: string;
   password: string;
   photo?: string;
   interest: string;
@@ -17,8 +16,8 @@ export interface IUser {
   foundingYear?: string;
   networkWants?: string;
   usp?: string;
-  community_impact?: string;
-  sdg_impact?: string;
+  communityImpact?: string;
+  sdgImpact?: string;
   revenue?: string;
   ebitda?: string;
   forecastedEbitda?: string;
