@@ -1,7 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-function sendSuccessResponse({ res, code = 200, message = "Operation Successful", data = null, custom = false, }) {
+function sendSuccessResponse({ res, code = 200, message = "Operation Successful", data = null, custom = false, pagination = null, }) {
     const response = custom && data ? { ...data } : { success: true, code: code, message, data };
+    if (pagination) {
+        response.pagination = pagination;
+    }
     return res.status(code).json(response);
 }
 function sendErrorResponse({ res, code, error = "Operation failed", custom = false, type, }) {

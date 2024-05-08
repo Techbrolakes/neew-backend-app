@@ -10,6 +10,7 @@ const router = express_1.default.Router();
 router.post("/auth/register", auth_service_1.default.register);
 router.post("/auth/login", auth_service_1.default.login);
 router.get("/posts", post_service_1.default.list);
+router.get("/post/getAll", post_service_1.default.getAll);
 router.post("/post/create", post_service_1.default.create);
 exports.default = router;
 //# sourceMappingURL=route.js.map

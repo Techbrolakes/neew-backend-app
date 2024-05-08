@@ -7,6 +7,8 @@ import testData from "./testData";
 
 const debug = Debug("neew:02.post.test");
 
+chai.should();
+
 async function createOlaPost(data: any) {
   const res = await request(app).post("/api/post/create").set("x-auth-token", testData.userOla.token).send(data);
 
@@ -44,5 +46,15 @@ describe("Post Test", async () => {
 
     const res = await createDavidPost(data);
     testData.userDavid.doc = res.data;
+  });
+
+  it("List All Posts", async () => {
+    const res = await request(app).get("/api/post/getAll").set("x-auth-token", testData.userOla.token);
+
+    console.log("res", res.body);
+    if (res.error) console.error(res.error);
+
+    res.status.should.equal(200);
+    res.body.data.length.should.equal(2);
   });
 });

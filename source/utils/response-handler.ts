@@ -7,6 +7,7 @@ type SuccessResponse = {
   message?: string;
   data?: any;
   custom?: boolean;
+  pagination?: any;
 };
 
 function sendSuccessResponse({
@@ -15,8 +16,13 @@ function sendSuccessResponse({
   message = "Operation Successful",
   data = null,
   custom = false,
+  pagination = null,
 }: SuccessResponse): Response<any> {
   const response = custom && data ? { ...data } : { success: true, code: code, message, data };
+
+  if (pagination) {
+    response.pagination = pagination;
+  }
 
   return res.status(code).json(response);
 }

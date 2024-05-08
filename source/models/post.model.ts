@@ -12,8 +12,8 @@ export interface IPost {
 
 const commentSchema = new Schema({
   comment: { required: true, type: String },
-  post: { ref: "Post", type: Types.ObjectId },
-  user: { ref: "User", type: Types.ObjectId },
+  post: { ref: "Posts", type: Types.ObjectId },
+  user: { ref: "Users", type: Types.ObjectId },
 });
 
 const schema = new Schema(
@@ -23,9 +23,9 @@ const schema = new Schema(
       type: [commentSchema],
     },
     content: { required: true, type: String },
-    creator: { ref: "User", type: Types.ObjectId },
+    creator: { ref: "Users", type: Types.ObjectId },
     image: { type: String },
-    likesUsers: [{ ref: "User", type: Types.ObjectId }],
+    likesUsers: [{ ref: "Users", type: Types.ObjectId }],
     numberOfComments: { default: 0, type: Number },
     totalLikes: { default: 0, type: Number },
   },

@@ -32,7 +32,6 @@ async function getAll(req: express.Request): Promise<IUserDocument[] | null | an
   const search = String(query.search);
   const perpage = Number(query.perpage) || 10;
   const page = Number(query.page) || 1;
-  const skip = page * perpage - perpage; // calculate and set the page skip number
   const dateFrom = query.dateFrom || "Jan 1 2021";
   const dateTo = query.dateTo || `${Date()}`;
   const period = "all" || String(query.period); // Set the period for filtering

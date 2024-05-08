@@ -9,6 +9,7 @@ router.post("/auth/register", userService.register);
 router.post("/auth/login", userService.login);
 
 router.get("/posts", postService.list);
+router.get("/post/getAll", postService.getAll);
 router.post("/post/create", postService.create);
 
 export default router;

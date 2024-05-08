@@ -27,8 +27,8 @@ exports.PostModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const commentSchema = new mongoose_1.Schema({
     comment: { required: true, type: String },
-    post: { ref: "Post", type: mongoose_1.Types.ObjectId },
-    user: { ref: "User", type: mongoose_1.Types.ObjectId },
+    post: { ref: "Posts", type: mongoose_1.Types.ObjectId },
+    user: { ref: "Users", type: mongoose_1.Types.ObjectId },
 });
 const schema = new mongoose_1.Schema({
     comments: {
@@ -36,9 +36,9 @@ const schema = new mongoose_1.Schema({
         type: [commentSchema],
     },
     content: { required: true, type: String },
-    creator: { ref: "User", type: mongoose_1.Types.ObjectId },
+    creator: { ref: "Users", type: mongoose_1.Types.ObjectId },
     image: { type: String },
-    likesUsers: [{ ref: "User", type: mongoose_1.Types.ObjectId }],
+    likesUsers: [{ ref: "Users", type: mongoose_1.Types.ObjectId }],
     numberOfComments: { default: 0, type: Number },
     totalLikes: { default: 0, type: Number },
 }, { timestamps: true });
