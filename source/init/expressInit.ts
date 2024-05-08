@@ -3,6 +3,7 @@ import express, { Express } from "express";
 import morgan from "morgan";
 
 import route from "../routes/route";
+import adminRoute from "../routes/adminRoute";
 import testRoute from "../routes/testRoute";
 
 function middlewareNotFound(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -33,17 +34,18 @@ function setupExpress(app: Express) {
       verify: (req, res, buf, encoding) => {
         req.rawBody = buf.toString();
       },
-    })
+    }),
   );
 
   app.use(cors());
 
-  const port = normalizePort(process.env.PORT || "5001");
+  const port = normalizePort(process.env.PORT || "9001");
 
-  app.use("/public", route);
+  app.use("/api", route);
+  app.use("/api/admin", adminRoute);
 
   if (process.env.NODE_ENV === "test") {
-    app.use("/test", testRoute);
+    app.use("/api/test", testRoute);
   }
 
   app.use(middlewareNotFound);

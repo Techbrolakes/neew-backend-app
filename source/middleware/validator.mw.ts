@@ -6,7 +6,6 @@ export async function validateResult(req: express.Request, res: express.Response
 
   if (!errors.isEmpty()) {
     const msg = { errors: errors.mapped() };
-    console.error(msg);
     return res.status(422).json(msg);
   }
 
