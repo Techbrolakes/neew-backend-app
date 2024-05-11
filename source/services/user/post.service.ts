@@ -161,6 +161,15 @@ const addComment = [
   async (req: express.Request, res: express.Response) => {
     try {
       const user = throwIfUndefined(req.user, "req.user");
+
+      if (!user) {
+        return ResponseHandler.sendErrorResponse({
+          res,
+          code: HTTP_CODES.UNAUTHORIZED,
+          error: "Unauthorized",
+        });
+      }
+
       const postId = req.body.postId;
 
       const post = await PostCore.getPostById(postId);
@@ -229,6 +238,7 @@ const create = [
   async (req: express.Request, res: express.Response) => {
     try {
       const user = throwIfUndefined(req.user, "req.user");
+
       const newPost = await PostCore.create({
         content: req.body.content,
         creator: new Types.ObjectId(user.id),

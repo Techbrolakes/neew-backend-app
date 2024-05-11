@@ -27,7 +27,7 @@ exports.PostModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const commentSchema = new mongoose_1.Schema({
     comment: { required: true, type: String },
-    post: { ref: "Posts", type: mongoose_1.Types.ObjectId },
+    post: { ref: "Post", type: mongoose_1.Types.ObjectId },
     user: { ref: "Users", type: mongoose_1.Types.ObjectId },
 });
 const schema = new mongoose_1.Schema({

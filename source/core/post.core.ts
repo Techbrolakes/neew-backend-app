@@ -77,9 +77,12 @@ type AddComment = {
 async function addComment({ postId, comment, creator }: AddComment): Promise<IPostDocument | null> {
   const post = await PostModel.findById(postId);
 
+  console.log("creator", creator);
+
   const newComment = {
     comment,
     user: creator,
+    post: postId,
   };
 
   if (newComment) {
@@ -91,9 +94,14 @@ async function addComment({ postId, comment, creator }: AddComment): Promise<IPo
   }
 
   post.comments.push(newComment);
-  post.numberOfComments = post.comments.length;
 
-  return post.save();
+  // increment the number of comments
+  post.numberOfComments = post.numberOfComments + 1;
+
+  // Save the updated post
+  const savePost = await post.save();
+
+  return savePost;
 }
 
 // Function to get a post by id

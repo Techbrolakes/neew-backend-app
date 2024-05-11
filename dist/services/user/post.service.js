@@ -149,6 +149,13 @@ const addComment = [
     async (req, res) => {
         try {
             const user = (0, utils_1.throwIfUndefined)(req.user, "req.user");
+            if (!user) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.UNAUTHORIZED,
+                    error: "Unauthorized",
+                });
+            }
             const postId = req.body.postId;
             const post = await post_core_1.default.getPostById(postId);
             if (!post) {

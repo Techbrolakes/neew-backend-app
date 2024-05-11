@@ -14,10 +14,10 @@ const express_validator_1 = require("express-validator");
 const debug = (0, debug_1.default)("project:user.service");
 const getEntreprenuers = [
     auth_mw_1.default,
-    (0, express_validator_1.query)("locations").optional().isString().withMessage("Locations must be a string"),
-    (0, express_validator_1.query)("industries").optional().isString().withMessage("Industries must be a string"),
     (0, express_validator_1.query)("page").optional().isNumeric().withMessage("Page must be a number"),
     (0, express_validator_1.query)("perpage").optional().isNumeric().withMessage("Perpage must be a number"),
+    (0, express_validator_1.query)("locations").optional().isString().withMessage("Locations must be a string"),
+    (0, express_validator_1.query)("industries").optional().isString().withMessage("Industries must be a string"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
@@ -60,7 +60,7 @@ const getEntreprenuers = [
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
-                message: "Entreprenuers fetched successfully",
+                message: "Entreprenuers fetched",
                 data: entrepreneurs,
                 pagination,
             });

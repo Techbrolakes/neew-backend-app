@@ -33,11 +33,11 @@ describe("User Test", async () => {
     const res = await request(app) //
       .post("/api/auth/register")
       .send({
-        email: "lekandaramola11@gmail.com",
+        email: "bajomodavid18@gmail.com",
         password: "Testing123",
         firstName: "David",
         lastName: "Bajomo",
-        interest: "entrepreneur",
+        interest: "investors",
         location: "Paris, France",
       });
 
@@ -86,7 +86,7 @@ describe("User Test", async () => {
     const res = await request(app) //
       .post("/api/auth/login")
       .send({
-        email: "lekandaramola11@gmail.com",
+        email: "bajomodavid18@gmail.com",
         password: "Testing123",
       });
 
@@ -99,5 +99,20 @@ describe("User Test", async () => {
     testData.userDavid.token = res.body.data.token;
   });
 
+  it("Get Me - Ola", async () => {
+    const res = await request(app) //
+      .get("/api/user/me")
+      .set("x-auth-token", testData.userOla.token);
 
+    if (res.error) {
+      console.error(res.error);
+    }
+
+    res.status.should.equal(200);
+    res.body.data.firstName.should.equal("ola");
+    res.body.data.lastName.should.equal("daramola");
+    res.body.data.email.should.equal("lekandar11@gmail.com");
+    res.body.data.interest.should.equal("entrepreneur");
+    res.body.data.location.should.equal("Gbagada, Lagos");
+  });
 });

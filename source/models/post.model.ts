@@ -12,7 +12,7 @@ export interface IPost {
 
 const commentSchema = new Schema({
   comment: { required: true, type: String },
-  post: { ref: "Posts", type: Types.ObjectId },
+  post: { ref: "Post", type: Types.ObjectId },
   user: { ref: "Users", type: Types.ObjectId },
 });
 

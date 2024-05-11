@@ -43,9 +43,11 @@ async function edit({ postId, content, image }) {
 }
 async function addComment({ postId, comment, creator }) {
     const post = await post_model_1.PostModel.findById(postId);
+    console.log("creator", creator);
     const newComment = {
         comment,
         user: creator,
+        post: postId,
     };
     if (newComment) {
         await notification_model_1.NotificationModel.create({
@@ -55,8 +57,11 @@ async function addComment({ postId, comment, creator }) {
         });
     }
     post.comments.push(newComment);
-    post.numberOfComments = post.comments.length;
-    return post.save();
+    // increment the number of comments
+    post.numberOfComments = post.numberOfComments + 1;
+    // Save the updated post
+    const savePost = await post.save();
+    return savePost;
 }
 // Function to get a post by id
 async function getPostById(postId) {

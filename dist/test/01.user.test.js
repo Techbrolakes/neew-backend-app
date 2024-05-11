@@ -31,11 +31,11 @@ describe("User Test", async () => {
         const res = await (0, supertest_1.default)(app_1.default) //
             .post("/api/auth/register")
             .send({
-            email: "lekandaramola11@gmail.com",
+            email: "bajomodavid18@gmail.com",
             password: "Testing123",
             firstName: "David",
             lastName: "Bajomo",
-            interest: "entrepreneur",
+            interest: "investors",
             location: "Paris, France",
         });
         if (res.error) {
@@ -74,7 +74,7 @@ describe("User Test", async () => {
         const res = await (0, supertest_1.default)(app_1.default) //
             .post("/api/auth/login")
             .send({
-            email: "lekandaramola11@gmail.com",
+            email: "bajomodavid18@gmail.com",
             password: "Testing123",
         });
         if (res.error) {
@@ -83,6 +83,20 @@ describe("User Test", async () => {
         res.status.should.equal(200);
         (res.body.data.token !== undefined).should.be.true;
         testData_1.default.userDavid.token = res.body.data.token;
+    });
+    it("Get Me - Ola", async () => {
+        const res = await (0, supertest_1.default)(app_1.default) //
+            .get("/api/user/me")
+            .set("x-auth-token", testData_1.default.userOla.token);
+        if (res.error) {
+            console.error(res.error);
+        }
+        res.status.should.equal(200);
+        res.body.data.firstName.should.equal("ola");
+        res.body.data.lastName.should.equal("daramola");
+        res.body.data.email.should.equal("lekandar11@gmail.com");
+        res.body.data.interest.should.equal("entrepreneur");
+        res.body.data.location.should.equal("Gbagada, Lagos");
     });
 });
 //# sourceMappingURL=01.user.test.js.map

@@ -13,10 +13,10 @@ const debug = Debug("project:user.service");
 
 const getEntreprenuers = [
   authMw,
-  query("locations").optional().isString().withMessage("Locations must be a string"),
-  query("industries").optional().isString().withMessage("Industries must be a string"),
   query("page").optional().isNumeric().withMessage("Page must be a number"),
   query("perpage").optional().isNumeric().withMessage("Perpage must be a number"),
+  query("locations").optional().isString().withMessage("Locations must be a string"),
+  query("industries").optional().isString().withMessage("Industries must be a string"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
@@ -71,7 +71,7 @@ const getEntreprenuers = [
       return ResponseHandler.sendSuccessResponse({
         res,
         code: HTTP_CODES.OK,
-        message: "Entreprenuers fetched successfully",
+        message: "Entreprenuers fetched",
         data: entrepreneurs,
         pagination,
       });
