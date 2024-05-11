@@ -98,4 +98,6 @@ describe("User Test", async () => {
     (res.body.data.token !== undefined).should.be.true;
     testData.userDavid.token = res.body.data.token;
   });
+
+
 });

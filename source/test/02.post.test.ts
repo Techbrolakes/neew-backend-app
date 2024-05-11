@@ -48,13 +48,39 @@ describe("Post Test", async () => {
     testData.userDavid.doc = res.data;
   });
 
+  it("List Ola Posts", async () => {
+    const res = await request(app).get("/api/posts").set("x-auth-token", testData.userOla.token);
+
+    if (res.error) console.error(res.error);
+
+    res.status.should.equal(200);
+    res.body.data.length.should.equal(1);
+  });
+
+  it("List David Posts", async () => {
+    const res = await request(app).get("/api/posts").set("x-auth-token", testData.userDavid.token);
+
+    if (res.error) console.error(res.error);
+
+    res.status.should.equal(200);
+    res.body.data.length.should.equal(1);
+  });
+
   it("List All Posts", async () => {
     const res = await request(app).get("/api/post/getAll").set("x-auth-token", testData.userOla.token);
 
-    console.log("res", res.body);
     if (res.error) console.error(res.error);
 
     res.status.should.equal(200);
     res.body.data.length.should.equal(2);
+  });
+
+  it("Get Ola's First Post", async () => {
+    const res = await request(app).get(`/api/post/${testData.userOla.doc._id}`).set("x-auth-token", testData.userOla.token);
+
+    if (res.error) console.error(res.error);
+
+    res.status.should.equal(200);
+    res.body.data.content.should.equal("This is Ola's post");
   });
 });

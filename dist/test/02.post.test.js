@@ -31,6 +31,7 @@ describe("Post Test", async () => {
             content: "This is Ola's post",
         };
         const res = await createOlaPost(data);
+        testData_1.default.userOla.doc = res.data;
     });
     it("Create Post - David", async () => {
         const data = {
@@ -38,14 +39,35 @@ describe("Post Test", async () => {
             content: "This is David's post",
         };
         const res = await createDavidPost(data);
+        testData_1.default.userDavid.doc = res.data;
+    });
+    it("List Ola Posts", async () => {
+        const res = await (0, supertest_1.default)(app_1.default).get("/api/posts").set("x-auth-token", testData_1.default.userOla.token);
+        if (res.error)
+            console.error(res.error);
+        res.status.should.equal(200);
+        res.body.data.length.should.equal(1);
+    });
+    it("List David Posts", async () => {
+        const res = await (0, supertest_1.default)(app_1.default).get("/api/posts").set("x-auth-token", testData_1.default.userDavid.token);
+        if (res.error)
+            console.error(res.error);
+        res.status.should.equal(200);
+        res.body.data.length.should.equal(1);
     });
     it("List All Posts", async () => {
         const res = await (0, supertest_1.default)(app_1.default).get("/api/post/getAll").set("x-auth-token", testData_1.default.userOla.token);
-        console.log("res", res.body);
         if (res.error)
             console.error(res.error);
         res.status.should.equal(200);
         res.body.data.length.should.equal(2);
+    });
+    it("Get Ola's First Post", async () => {
+        const res = await (0, supertest_1.default)(app_1.default).get(`/api/post/${testData_1.default.userOla.doc._id}`).set("x-auth-token", testData_1.default.userOla.token);
+        if (res.error)
+            console.error(res.error);
+        res.status.should.equal(200);
+        res.body.data.content.should.equal("This is Ola's post");
     });
 });
 //# sourceMappingURL=02.post.test.js.map

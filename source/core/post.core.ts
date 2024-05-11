@@ -1,27 +1,101 @@
-import { IPost, PostModel } from "../models/post.model";
+import { PostModel } from "../models/post.model";
+import { UserModel } from "../models/user.model";
 import { IPostDocument } from "../models/post.model";
-import { FilterQuery, Types, UpdateQuery } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import express from "express";
-import { paginationUtil, searchUtil, timeUtil } from "../utils";
+import { paginationUtil, timeUtil } from "../utils";
 
-async function getAll(req: express.Request): Promise<IPostDocument[] | null | any> {
-  const { query } = req;
+// Function to get post likes by post ID
+async function getLikesUsers(postId: Types.ObjectId): Promise<IPostDocument | any | null> {
+  const post = await PostModel.findById(postId);
 
-  const perpage = Number(query.perpage) || 10; // Set the number of records to return
-  const page = Number(query.page) || 1; // Set the page number
-  const dateFrom: any = query.dateFrom || "Jan 1 2020"; // Set the dateFrom
-  const dateTo: any = query.dateTo || `${Date()}`; // Set the dateTo
-  const period = String(query.period) || "all"; // Set the period
+  if (post) {
+    const users = await UserModel.find({ _id: { $in: post.likesUsers } }).select("firstName lastName photo interest  -_id");
 
-  // Check the period and set the time filter accordingly
-  const timeFilter = await timeUtil({ period, dateFrom, dateTo });
+    return users;
+  }
+}
 
-  const filterQuery: any = {
-    ...timeFilter,
+// Function to like a post
+type LikePost = {
+  postId: Types.ObjectId;
+  userId: Types.ObjectId | any;
+};
+
+async function likePost({ postId, userId }: LikePost): Promise<IPostDocument | null> {
+  const post = await PostModel.findById(postId);
+
+  const index = post.likesUsers.indexOf(userId);
+
+  if (index !== -1) {
+    post.likesUsers.splice(index, 1); // Remove user ID from likesUsers array
+    post.totalLikes -= 1;
+  } else {
+    post.likesUsers.push(userId);
+    post.totalLikes += 1;
+  }
+
+  return post.save();
+}
+
+// Function to delete a post
+async function deletePost(postId: Types.ObjectId): Promise<IPostDocument | null | any> {
+  return PostModel.findByIdAndDelete({ _id: postId });
+}
+
+// Function to edit a post
+type EditPost = {
+  postId: Types.ObjectId;
+  content: string;
+  image: string;
+};
+
+async function edit({ postId, content, image }: EditPost): Promise<IPostDocument | null> {
+  const post = await PostModel.findById(postId);
+
+  post.content = content;
+  post.image = image;
+
+  return post.save();
+}
+
+// Function to addComment to a post
+type AddComment = {
+  postId: Types.ObjectId;
+  comment: string;
+  creator: Types.ObjectId;
+};
+
+async function addComment({ postId, comment, creator }: AddComment): Promise<IPostDocument | null> {
+  const post = await PostModel.findById(postId);
+
+  const newComment = {
+    comment,
+    user: creator,
   };
 
+  post.comments.push(newComment);
+  post.numberOfComments = post.comments.length;
+
+  return post.save();
+}
+
+// Function to get a post by id
+async function getPostById(postId: Types.ObjectId): Promise<IPostDocument | null> {
+  return PostModel.findById(postId)
+    .populate("creator")
+    .populate("comments.post", "content totalLikes numberOfComments")
+    .populate("comments.user", "firstName lastName photo")
+    .lean();
+}
+
+async function getAllPosts(req: express.Request): Promise<IPostDocument[] | null | any> {
+  const { query } = req;
+  const perpage = Number(query.perpage) || 10;
+  const page = Number(query.page) || 1;
+
   const [posts, total] = await Promise.all([
-    PostModel.find(filterQuery)
+    PostModel.find()
       .sort({ createdAt: -1 })
       .populate({
         path: "creator",
@@ -31,7 +105,7 @@ async function getAll(req: express.Request): Promise<IPostDocument[] | null | an
       .skip(page * perpage - perpage)
       .lean(),
 
-    PostModel.countDocuments(filterQuery),
+    PostModel.countDocuments(),
   ]);
 
   const pagination = await paginationUtil({ total, page, perpage });
@@ -47,15 +121,8 @@ async function find(req: express.Request, userId: Types.ObjectId): Promise<IPost
   const { query } = req; // Get the query params from the request object
   const perpage = Number(query.perpage) || 10; // Set the number of records to return
   const page = Number(query.page) || 1; // Set the page number
-  const dateFrom: any = query.dateFrom || "Jan 1 2020"; // Set the dateFrom
-  const dateTo: any = query.dateTo || `${Date()}`; // Set the dateTo
-  const period = String(query.period) || "all"; // Set the period
-
-  // Check the period and set the time filter accordingly
-  const timeFilter = await timeUtil({ period, dateFrom, dateTo });
 
   const filterQuery: any = {
-    ...timeFilter,
     creator: userId,
   };
 
@@ -107,7 +174,13 @@ const PostCore = {
   getOne,
   create,
   find,
-  getAll,
+  getAllPosts,
+  getPostById,
+  addComment,
+  edit,
+  deletePost,
+  likePost,
+  getLikesUsers,
 };
 
 export default PostCore;
