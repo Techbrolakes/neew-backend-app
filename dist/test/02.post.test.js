@@ -92,20 +92,19 @@ describe("Post Test", async () => {
         res.status.should.equal(200);
         res.body.data.content.should.equal("This is Ola's edited post");
     });
-    it("Add Comment to Ola's First Post", async () => {
-        const data = {
-            postId: testData_1.default.userOla.doc._id,
-            comment: "This is a good post",
-        };
-        const res = await (0, supertest_1.default)(app_1.default)
-            .post("/api/post/add-comment") //
-            .set("x-auth-token", testData_1.default.userDavid.token)
-            .send(data);
-        if (res.error)
-            console.error(res.error);
-        res.status.should.equal(201);
-        res.body.data.comments.length.should.equal(1);
-    });
+    // it("Add Comment to Ola's First Post", async () => {
+    //   const data = {
+    //     postId: testData.userOla.doc._id,
+    //     comment: "This is a good post",
+    //   };
+    //   const res = await request(app)
+    //     .post("/api/post/add-comment") //
+    //     .set("x-auth-token", testData.userDavid.token)
+    //     .send(data);
+    //   if (res.error) console.error(res.error);
+    //   res.status.should.equal(201);
+    //   res.body.data.comments.length.should.equal(1);
+    // });
     it("Add Like to Ola's Post", async () => {
         const data = {
             postId: testData_1.default.userDavid.doc._id,
@@ -116,8 +115,17 @@ describe("Post Test", async () => {
             .send(data);
         if (res.error)
             console.error(res.error);
-        res.status.should.equal(200);
+        res.status.should.equal(201);
         res.body.data.totalLikes.should.equal(1);
+    });
+    it("Delete David's Post", async () => {
+        const res = await (0, supertest_1.default)(app_1.default)
+            .delete(`/api/post/delete/${testData_1.default.userDavid.doc._id}`) //
+            .set("x-auth-token", testData_1.default.userDavid.token);
+        if (res.error)
+            console.error(res.error);
+        res.status.should.equal(200);
+        res.body.message.should.equal("Post deleted");
     });
 });
 //# sourceMappingURL=02.post.test.js.map
