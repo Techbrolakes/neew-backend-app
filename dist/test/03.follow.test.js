@@ -7,4 +7,5 @@ const chai_1 = __importDefault(require("chai"));
 const debug_1 = __importDefault(require("debug"));
 const debug = (0, debug_1.default)("neew:03.follow.test");
 chai_1.default.should();
+describe("Follow Test", async () => { });
 //# sourceMappingURL=03.follow.test.js.map

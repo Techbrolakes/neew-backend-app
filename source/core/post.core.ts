@@ -1,9 +1,10 @@
 import { PostModel } from "../models/post.model";
 import { UserModel } from "../models/user.model";
+import { NotificationModel } from "../models/notification.model";
 import { IPostDocument } from "../models/post.model";
 import { FilterQuery, Types } from "mongoose";
 import express from "express";
-import { paginationUtil, timeUtil } from "../utils";
+import { paginationUtil } from "../utils";
 
 // Function to get post likes by post ID
 async function getLikesUsers(postId: Types.ObjectId): Promise<IPostDocument | any | null> {
@@ -33,6 +34,13 @@ async function likePost({ postId, userId }: LikePost): Promise<IPostDocument | n
   } else {
     post.likesUsers.push(userId);
     post.totalLikes += 1;
+
+    // Add notification
+    await NotificationModel.create({
+      message: `New like on your post`,
+      notificationType: "like",
+      userId,
+    });
   }
 
   return post.save();
@@ -73,6 +81,14 @@ async function addComment({ postId, comment, creator }: AddComment): Promise<IPo
     comment,
     user: creator,
   };
+
+  if (newComment) {
+    await NotificationModel.create({
+      message: `New comment on your post`,
+      notificationType: "comment",
+      creator,
+    });
+  }
 
   post.comments.push(newComment);
   post.numberOfComments = post.comments.length;

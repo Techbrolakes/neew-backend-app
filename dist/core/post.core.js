@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const post_model_1 = require("../models/post.model");
 const user_model_1 = require("../models/user.model");
+const notification_model_1 = require("../models/notification.model");
 const utils_1 = require("../utils");
 // Function to get post likes by post ID
 async function getLikesUsers(postId) {
@@ -21,6 +22,12 @@ async function likePost({ postId, userId }) {
     else {
         post.likesUsers.push(userId);
         post.totalLikes += 1;
+        // Add notification
+        await notification_model_1.NotificationModel.create({
+            message: `New like on your post`,
+            notificationType: "like",
+            userId,
+        });
     }
     return post.save();
 }
@@ -40,6 +47,13 @@ async function addComment({ postId, comment, creator }) {
         comment,
         user: creator,
     };
+    if (newComment) {
+        await notification_model_1.NotificationModel.create({
+            message: `New comment on your post`,
+            notificationType: "comment",
+            creator,
+        });
+    }
     post.comments.push(newComment);
     post.numberOfComments = post.comments.length;
     return post.save();

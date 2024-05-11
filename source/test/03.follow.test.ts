@@ -8,4 +8,6 @@ import testData from "./testData";
 const debug = Debug("neew:03.follow.test");
 
 chai.should();
+
+describe("Follow Test", async () => { });
                                                                                                   
