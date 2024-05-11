@@ -23,20 +23,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NotificationModel = void 0;
+exports.FollowModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const schema = new mongoose_1.Schema({
-    message: { required: true, type: String },
-    notificationType: { required: true, type: String },
-    read: {
-        default: "false",
-        enum: ["false", "true"],
-        type: String,
-    },
+    followerId: { required: true, type: String },
     userId: { required: true, type: String },
 }, {
     timestamps: true,
 });
-// A model type combining INotificationDocument and Model interfaces
-exports.NotificationModel = mongoose_1.default.model("Notification", schema);
-//# sourceMappingURL=notification.model.js.map
+// A model type combining IFollowDocument and Model interfaces
+exports.FollowModel = mongoose_1.default.model("Follow", schema);
+//# sourceMappingURL=follow.model.js.map

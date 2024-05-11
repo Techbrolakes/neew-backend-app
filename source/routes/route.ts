@@ -1,12 +1,15 @@
 import express from "express";
 
-import userService from "../services/user/auth.service";
+import authService from "../services/user/auth.service";
 import postService from "../services/user/post.service";
+import userService from "../services/user/user.service";
+import followService from "../services/user/follow.service";
+import notificationService from "../services/user/notification.service";
 
 const router = express.Router();
 
-router.post("/auth/login", userService.login);
-router.post("/auth/register", userService.register);
+router.post("/auth/login", authService.login);
+router.post("/auth/register", authService.register);
 
 router.get("/posts", postService.list);
 router.get("/post/getAll", postService.getAll);
@@ -19,5 +22,14 @@ router.get("/post/get-likes-users/:postId", postService.getLikesUsers);
 router.post("/post/add-comment", postService.addComment);
 router.delete("/post/delete/:postId", postService.deletePost);
 
+router.get("/user/entreprenuers", userService.getEntreprenuers);
+router.get("/user/me", userService.me);
+
+router.get("/user/followers/:userId", followService.getFollowers);
+router.post("/user/follow", followService.followUser);
+
+router.get("/notifications", notificationService.getNotifications);
+router.get("/user-notifications", notificationService.getUserNotifications);
+router.put("/user-notifications/mark-as-read", notificationService.markNotificationsAsRead);
 
 export default router;

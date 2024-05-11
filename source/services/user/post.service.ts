@@ -9,7 +9,6 @@ import PostCore from "../../core/post.core";
 import { query } from "express-validator";
 import { Types } from "mongoose";
 import { throwIfUndefined } from "../../utils";
-import { PostModel } from "../../models/post.model";
 
 const debug = Debug("project:post.service");
 
@@ -288,7 +287,7 @@ const getAll = [
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
-      const posts =  PostCore.getAllPosts(req);
+      const posts = PostCore.getAllPosts(req);
 
       return ResponseHandler.sendSuccessResponse({
         res,
