@@ -259,14 +259,14 @@ const list = [
         }
     },
 ];
-const getAll = [
+const getPosts = [
     auth_mw_1.default,
     (0, express_validator_2.query)("perpage").isNumeric().optional().withMessage("Perpage must be a number"),
     (0, express_validator_2.query)("page").isNumeric().optional().withMessage("Page must be a number"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
-            const posts = post_core_1.default.getAllPosts(req);
+            const posts = await post_core_1.default.getAllPosts(req);
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
@@ -286,7 +286,7 @@ const getAll = [
 exports.default = {
     list,
     create,
-    getAll,
+    getPosts,
     get,
     addComment,
     edit,

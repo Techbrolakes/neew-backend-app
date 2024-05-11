@@ -280,14 +280,14 @@ const list = [
   },
 ];
 
-const getAll = [
+const getPosts = [
   authMw,
   query("perpage").isNumeric().optional().withMessage("Perpage must be a number"),
   query("page").isNumeric().optional().withMessage("Page must be a number"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
-      const posts = PostCore.getAllPosts(req);
+      const posts = await PostCore.getAllPosts(req);
 
       return ResponseHandler.sendSuccessResponse({
         res,
@@ -308,7 +308,7 @@ const getAll = [
 export default {
   list,
   create,
-  getAll,
+  getPosts,
   get,
   addComment,
   edit,

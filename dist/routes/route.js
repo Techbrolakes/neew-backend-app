@@ -13,7 +13,7 @@ const router = express_1.default.Router();
 router.post("/auth/login", auth_service_1.default.login);
 router.post("/auth/register", auth_service_1.default.register);
 router.get("/posts", post_service_1.default.list);
-router.get("/post/getAll", post_service_1.default.getAll);
+router.get("/post/get-all-posts", post_service_1.default.getPosts);
 router.put("/post/edit", post_service_1.default.edit);
 router.get("/post/:postId", post_service_1.default.get);
 router.post("/post/create", post_service_1.default.create);

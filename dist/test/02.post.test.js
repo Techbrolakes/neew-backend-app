@@ -59,6 +59,7 @@ describe("Post Test", async () => {
         const res = await (0, supertest_1.default)(app_1.default).get("/api/post/getAll").set("x-auth-token", testData_1.default.userOla.token);
         if (res.error)
             console.error(res.error);
+        console.log(res.body);
         res.status.should.equal(200);
         res.body.data.length.should.equal(2);
     });

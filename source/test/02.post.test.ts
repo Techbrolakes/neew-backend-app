@@ -71,6 +71,8 @@ describe("Post Test", async () => {
 
     if (res.error) console.error(res.error);
 
+    console.log(res.body);
+
     res.status.should.equal(200);
     res.body.data.length.should.equal(2);
   });

@@ -12,7 +12,7 @@ router.post("/auth/login", authService.login);
 router.post("/auth/register", authService.register);
 
 router.get("/posts", postService.list);
-router.get("/post/getAll", postService.getAll);
+router.get("/post/get-all-posts", postService.getPosts);
 
 router.put("/post/edit", postService.edit);
 router.get("/post/:postId", postService.get);
