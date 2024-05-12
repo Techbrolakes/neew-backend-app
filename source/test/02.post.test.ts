@@ -10,7 +10,10 @@ const debug = Debug("neew:02.post.test");
 chai.should();
 
 async function createOlaPost(data: any) {
-  const res = await request(app).post("/api/post/create").set("x-auth-token", testData.userOla.token).send(data);
+  const res = await request(app) //
+    .post("/api/post/create")
+    .set("x-auth-token", testData.userOla.token)
+    .send(data);
 
   if (res.error) console.error(res.error);
 
@@ -19,7 +22,10 @@ async function createOlaPost(data: any) {
 }
 
 async function createDavidPost(data: any) {
-  const res = await request(app).post("/api/post/create").set("x-auth-token", testData.userDavid.token).send(data);
+  const res = await request(app) //
+    .post("/api/post/create")
+    .set("x-auth-token", testData.userDavid.token)
+    .send(data);
 
   if (res.error) console.error(res.error);
 
@@ -35,7 +41,7 @@ describe("Post Test", async () => {
     };
 
     const res = await createOlaPost(data);
-    testData.userOla.doc = res.data;
+    testData.userOla.post = res.data;
   });
 
   it("Create Post - David", async () => {
@@ -45,7 +51,7 @@ describe("Post Test", async () => {
     };
 
     const res = await createDavidPost(data);
-    testData.userDavid.doc = res.data;
+    testData.userDavid.post = res.data;
   });
 
   it("List Ola Posts", async () => {
@@ -83,7 +89,7 @@ describe("Post Test", async () => {
 
   it("Get Ola's First Post", async () => {
     const res = await request(app)
-      .get(`/api/post/${testData.userOla.doc._id}`) //
+      .get(`/api/post/${testData.userOla.post._id}`) //
       .set("x-auth-token", testData.userOla.token);
 
     if (res.error) console.error(res.error);
@@ -95,7 +101,7 @@ describe("Post Test", async () => {
   it("Edit Ola's First Post", async () => {
     const data = {
       content: "This is Ola's edited post",
-      postId: testData.userOla.doc._id,
+      postId: testData.userOla.post._id,
       image: "https://picsum.photos/200/300",
     };
 
@@ -112,7 +118,7 @@ describe("Post Test", async () => {
 
   // it("Add Comment to Ola's First Post", async () => {
   //   const data = {
-  //     postId: testData.userOla.doc._id,
+  //     postId: testData.userOla.post._id,
   //     comment: "This is a good post",
   //   };
 
@@ -129,7 +135,7 @@ describe("Post Test", async () => {
 
   it("Add Like to Ola's Post", async () => {
     const data = {
-      postId: testData.userDavid.doc._id,
+      postId: testData.userDavid.post._id,
     };
 
     const res = await request(app)
@@ -145,7 +151,7 @@ describe("Post Test", async () => {
 
   it("Delete David's Post", async () => {
     const res = await request(app)
-      .delete(`/api/post/delete/${testData.userDavid.doc._id}`) //
+      .delete(`/api/post/delete/${testData.userDavid.post._id}`) //
       .set("x-auth-token", testData.userDavid.token);
 
     if (res.error) console.error(res.error);

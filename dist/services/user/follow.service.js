@@ -22,6 +22,7 @@ const getFollowers = [
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
             const userId = req.params.userId;
             const user = await user_model_1.UserModel.findById(userId);
+            console.log("user", user);
             if (!user) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
@@ -61,8 +62,7 @@ const followUser = [
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
             const { follower, followee } = req.body;
-            const user = await user_model_1.UserModel.findById(followee);
-            const followerUser = await user_model_1.UserModel.findById(follower);
+            const user = await user_model_1.UserModel.findOne({ _id: followee });
             if (!user) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
@@ -70,6 +70,7 @@ const followUser = [
                     error: "User not found",
                 });
             }
+            const followerUser = await user_model_1.UserModel.findById(follower);
             if (!followerUser) {
                 return response_handler_1.default.sendErrorResponse({
                     res,

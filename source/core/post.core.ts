@@ -77,8 +77,6 @@ type AddComment = {
 async function addComment({ postId, comment, creator }: AddComment): Promise<IPostDocument | null> {
   const post = await PostModel.findById(postId);
 
-  console.log("creator", creator);
-
   const newComment = {
     comment,
     user: creator,

@@ -43,7 +43,6 @@ async function edit({ postId, content, image }) {
 }
 async function addComment({ postId, comment, creator }) {
     const post = await post_model_1.PostModel.findById(postId);
-    console.log("creator", creator);
     const newComment = {
         comment,
         user: creator,

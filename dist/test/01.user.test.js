@@ -91,12 +91,28 @@ describe("User Test", async () => {
         if (res.error) {
             console.error(res.error);
         }
+        testData_1.default.userOla.doc = res.body.data;
         res.status.should.equal(200);
         res.body.data.firstName.should.equal("ola");
         res.body.data.lastName.should.equal("daramola");
         res.body.data.email.should.equal("lekandar11@gmail.com");
         res.body.data.interest.should.equal("entrepreneur");
         res.body.data.location.should.equal("Gbagada, Lagos");
+    });
+    it("Get Me - David", async () => {
+        const res = await (0, supertest_1.default)(app_1.default) //
+            .get("/api/user/me")
+            .set("x-auth-token", testData_1.default.userDavid.token);
+        if (res.error) {
+            console.error(res.error);
+        }
+        testData_1.default.userDavid.doc = res.body.data;
+        res.status.should.equal(200);
+        res.body.data.firstName.should.equal("david");
+        res.body.data.lastName.should.equal("bajomo");
+        res.body.data.email.should.equal("bajomodavid18@gmail.com");
+        res.body.data.interest.should.equal("investors");
+        res.body.data.location.should.equal("Paris, France");
     });
 });
 //# sourceMappingURL=01.user.test.js.map

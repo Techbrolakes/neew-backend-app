@@ -108,6 +108,7 @@ describe("User Test", async () => {
       console.error(res.error);
     }
 
+    testData.userOla.doc = res.body.data;
     res.status.should.equal(200);
     res.body.data.firstName.should.equal("ola");
     res.body.data.lastName.should.equal("daramola");
@@ -115,4 +116,24 @@ describe("User Test", async () => {
     res.body.data.interest.should.equal("entrepreneur");
     res.body.data.location.should.equal("Gbagada, Lagos");
   });
+
+
+   it("Get Me - David", async () => {
+     const res = await request(app) //
+       .get("/api/user/me")
+       .set("x-auth-token", testData.userDavid.token);
+
+     if (res.error) {
+       console.error(res.error);
+     }
+
+     testData.userDavid.doc = res.body.data;
+     res.status.should.equal(200);
+     res.body.data.firstName.should.equal("david");
+     res.body.data.lastName.should.equal("bajomo");
+     res.body.data.email.should.equal("bajomodavid18@gmail.com");
+     res.body.data.interest.should.equal("investors");
+     res.body.data.location.should.equal("Paris, France");
+   });
+
 });

@@ -23,6 +23,8 @@ const getFollowers = [
 
       const user = await UserModel.findById(userId);
 
+      console.log("user", user);
+
       if (!user) {
         return ResponseHandler.sendErrorResponse({
           res,
@@ -67,7 +69,7 @@ const followUser = [
 
       const { follower, followee } = req.body;
 
-      const user = await UserModel.findById(followee);
+      const user = await UserModel.findOne({ _id: followee });
 
       if (!user) {
         return ResponseHandler.sendErrorResponse({
