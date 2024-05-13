@@ -170,9 +170,7 @@ const addComment = [
         });
       }
 
-      const postId = req.body.postId;
-
-      const post = await PostCore.getPostById(postId);
+      const post = await PostCore.getPostById(req.body.postId);
 
       if (!post) {
         return ResponseHandler.sendErrorResponse({
@@ -183,9 +181,9 @@ const addComment = [
       }
 
       const comment = await PostCore.addComment({
-        postId,
+        postId: req.body.postId,
         comment: req.body.comment,
-        creator: new Types.ObjectId(user.id),
+        userId: new Types.ObjectId(user.id),
       });
 
       return ResponseHandler.sendSuccessResponse({

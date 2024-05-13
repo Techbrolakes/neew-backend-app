@@ -156,8 +156,7 @@ const addComment = [
                     error: "Unauthorized",
                 });
             }
-            const postId = req.body.postId;
-            const post = await post_core_1.default.getPostById(postId);
+            const post = await post_core_1.default.getPostById(req.body.postId);
             if (!post) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
@@ -166,9 +165,9 @@ const addComment = [
                 });
             }
             const comment = await post_core_1.default.addComment({
-                postId,
+                postId: req.body.postId,
                 comment: req.body.comment,
-                creator: new mongoose_1.Types.ObjectId(user.id),
+                userId: new mongoose_1.Types.ObjectId(user.id),
             });
             return response_handler_1.default.sendSuccessResponse({
                 res,

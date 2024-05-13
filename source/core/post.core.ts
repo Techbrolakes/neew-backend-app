@@ -71,15 +71,15 @@ async function edit({ postId, content, image }: EditPost): Promise<IPostDocument
 type AddComment = {
   postId: Types.ObjectId;
   comment: string;
-  creator: Types.ObjectId;
+  userId: Types.ObjectId;
 };
 
-async function addComment({ postId, comment, creator }: AddComment): Promise<IPostDocument | null> {
+async function addComment({ postId, comment, userId }: AddComment): Promise<IPostDocument | null> {
   const post = await PostModel.findById(postId);
 
   const newComment = {
     comment,
-    user: creator,
+    user: userId,
     post: postId,
   };
 
@@ -87,7 +87,7 @@ async function addComment({ postId, comment, creator }: AddComment): Promise<IPo
     await NotificationModel.create({
       message: `New comment on your post`,
       notificationType: "comment",
-      creator,
+      userId,
     });
   }
 

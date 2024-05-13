@@ -116,22 +116,24 @@ describe("Post Test", async () => {
     res.body.data.content.should.equal("This is Ola's edited post");
   });
 
-  // it("Add Comment to Ola's First Post", async () => {
-  //   const data = {
-  //     postId: testData.userOla.post._id,
-  //     comment: "This is a good post",
-  //   };
+  it("Add Comment to Ola's First Post", async () => {
+    const data = {
+      postId: testData.userOla.post._id,
+      comment: "This is a good post",
+    };
 
-  //   const res = await request(app)
-  //     .post("/api/post/add-comment") //
-  //     .set("x-auth-token", testData.userDavid.token)
-  //     .send(data);
+    const res = await request(app)
+      .post("/api/post/add-comment") //
+      .set("x-auth-token", testData.userDavid.token)
+      .send(data);
 
-  //   if (res.error) console.error(res.error);
+    if (res.error) console.error(res.error);
 
-  //   res.status.should.equal(201);
-  //   res.body.data.comments.length.should.equal(1);
-  // });
+    res.status.should.equal(201);
+    res.body.data.comments.length.should.equal(1);
+    res.body.data.comments[0].comment.should.equal("This is a good post");
+    res.body.data.comments[0].user.should.equal(testData.userDavid.doc._id);
+  });
 
   it("Add Like to Ola's Post", async () => {
     const data = {

@@ -41,18 +41,18 @@ async function edit({ postId, content, image }) {
     post.image = image;
     return post.save();
 }
-async function addComment({ postId, comment, creator }) {
+async function addComment({ postId, comment, userId }) {
     const post = await post_model_1.PostModel.findById(postId);
     const newComment = {
         comment,
-        user: creator,
+        user: userId,
         post: postId,
     };
     if (newComment) {
         await notification_model_1.NotificationModel.create({
             message: `New comment on your post`,
             notificationType: "comment",
-            creator,
+            userId,
         });
     }
     post.comments.push(newComment);
