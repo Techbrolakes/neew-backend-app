@@ -22,8 +22,9 @@ router.get("/post/get-likes-users/:postId", postService.getLikesUsers);
 router.post("/post/add-comment", postService.addComment);
 router.delete("/post/delete/:postId", postService.deletePost);
 
-router.get("/user/entreprenuers", userService.getEntreprenuers);
 router.get("/user/me", userService.me);
+router.get("/users", userService.getAllUsers);
+router.get("/user/entreprenuers", userService.getEntreprenuers);
 
 router.get("/user/followers/:userId", followService.getFollowers);
 router.post("/user/follow", followService.followUser);

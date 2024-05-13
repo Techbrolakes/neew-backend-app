@@ -7,23 +7,25 @@ import { NotificationModel } from "../../models/notification.model";
 import authMw from "../../middleware/auth.mw";
 import ResponseHandler from "../../utils/response-handler";
 import { HTTP_CODES } from "../../constants/appDefaults.constant";
-import { throwIfUndefined } from "../../utils";
-import { body } from "express-validator";
+import { paginationUtil, throwIfUndefined } from "../../utils";
+import { body, query } from "express-validator";
 
 const debug = Debug("project:follow.service");
 
 const getFollowers = [
   authMw,
+  query("page").optional().isNumeric().withMessage("Page must be a number"),
+  query("perpage").optional().isNumeric().withMessage("Perpage must be a number"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
       throwIfUndefined(req.user, "req.user");
 
+      const { page, perpage } = req.query as any;
+
       const userId = req.params.userId;
 
       const user = await UserModel.findById(userId);
-
-      console.log("user", user);
 
       if (!user) {
         return ResponseHandler.sendErrorResponse({
@@ -33,20 +35,34 @@ const getFollowers = [
         });
       }
 
-      const followers = await FollowModel.find({ userId });
+      const [followers, following, total] = await Promise.all([
+        FollowModel.find({ userId })
+          .select("-__v -userId")
+          .limit(perpage)
+          .skip(page * perpage - perpage)
+          .lean(),
 
-      const following = await FollowModel.find({ followerId: userId });
+        FollowModel.find({ followerId: userId })
+          .select("-__v -followerId")
+          .limit(perpage)
+          .skip(page * perpage - perpage)
+          .lean(),
+
+        FollowModel.countDocuments({ userId }),
+      ]);
+
+      const pagination = await paginationUtil({ total, page, perpage });
 
       return ResponseHandler.sendSuccessResponse({
         res,
         message: "Followers fetched",
         data: {
-          email: user.email,
           followers,
-          followersCount: followers.length,
           following,
+          followersCount: followers.length,
           followingCount: following.length,
         },
+        pagination,
       });
     } catch (error: any) {
       return ResponseHandler.sendErrorResponse({
@@ -60,14 +76,15 @@ const getFollowers = [
 
 const followUser = [
   authMw,
-  body("follower").isString().withMessage("Follower is required"),
   body("followee").isString().withMessage("Followee is required"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
       throwIfUndefined(req.user, "req.user");
 
-      const { follower, followee } = req.body;
+      const follower = req.user.id;
+
+      const { followee } = req.body;
 
       const user = await UserModel.findOne({ _id: followee });
 

@@ -2,7 +2,6 @@ import express from "express";
 import Debug from "debug";
 import { validateResult } from "../../middleware/validator.mw";
 import { UserModel } from "../../models/user.model";
-import { FollowModel } from "../../models/follow.model";
 import authMw from "../../middleware/auth.mw";
 import ResponseHandler from "../../utils/response-handler";
 import { HTTP_CODES } from "../../constants/appDefaults.constant";
@@ -10,6 +9,40 @@ import { paginationUtil, throwIfUndefined } from "../../utils";
 import { query } from "express-validator";
 
 const debug = Debug("project:user.service");
+
+const getAllUsers = [
+  authMw,
+  query("page").optional().isNumeric().withMessage("Page must be a number"),
+  query("perpage").optional().isNumeric().withMessage("Perpage must be a number"),
+  validateResult,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      throwIfUndefined(req.user, "req.user");
+
+      const { page, perpage } = req.query as any;
+
+      const users = await UserModel.find()
+        .select("-password")
+        .lean(true)
+        .sort({ createdAt: -1 })
+        .limit(perpage)
+        .skip(page * perpage - perpage);
+
+      return ResponseHandler.sendSuccessResponse({
+        res,
+        code: HTTP_CODES.OK,
+        message: "Users fetched",
+        data: users,
+      });
+    } catch (error: any) {
+      return ResponseHandler.sendErrorResponse({
+        res,
+        code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+        error: `${error}`,
+      });
+    }
+  },
+];
 
 const getEntreprenuers = [
   authMw,
@@ -112,4 +145,5 @@ const me = [
 export default {
   getEntreprenuers,
   me,
+  getAllUsers,
 };

@@ -11,15 +11,12 @@ chai.should();
 
 describe("Follow Test", async () => {
   it("Lekan follows david", async () => {
-    const data = {
-      follower: testData.userOla.doc._id,
-      followee: testData.userDavid.doc._id,
-    };
-
     const res = await request(app) //
       .post("/api/user/follow")
       .set("x-auth-token", testData.userOla.token)
-      .send(data);
+      .send({
+        followee: testData.userDavid.doc._id,
+      });
 
     if (res.error) console.error(res.error);
 
@@ -31,7 +28,6 @@ describe("Follow Test", async () => {
       .post("/api/user/follow")
       .set("x-auth-token", testData.userDavid.token)
       .send({
-        follower: testData.userDavid.doc._id,
         followee: testData.userOla.doc._id,
       });
 
@@ -50,19 +46,21 @@ describe("Follow Test", async () => {
     res.status.should.equal(200);
     res.body.data.followers.length.should.equal(1);
     res.body.data.following.length.should.equal(1);
+    res.body.data.followersCount.should.equal(1);
+    res.body.data.followingCount.should.equal(1);
   });
 
+  it("Get followers of David", async () => {
+    const res = await request(app) //
+      .get(`/api/user/followers/${testData.userDavid.doc._id}`)
+      .set("x-auth-token", testData.userDavid.token);
 
-    it("Get followers of David", async () => {
-      const res = await request(app) //
-        .get(`/api/user/followers/${testData.userDavid.doc._id}`)
-        .set("x-auth-token", testData.userDavid.token);
+    if (res.error) console.error(res.error);
 
-      if (res.error) console.error(res.error);
-
-      res.status.should.equal(200);
-      res.body.data.followers.length.should.equal(1);
-      res.body.data.following.length.should.equal(1);
-    });
- 
+    res.status.should.equal(200);
+    res.body.data.followers.length.should.equal(1);
+    res.body.data.following.length.should.equal(1);
+    res.body.data.followersCount.should.equal(1);
+    res.body.data.followingCount.should.equal(1);
+  });
 });
