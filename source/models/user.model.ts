@@ -83,6 +83,8 @@ const UserSchema: Schema = new Schema(
     traction: { required: false, type: String },
     usp: { required: false, type: String },
     website: { required: false, type: String },
+    city: { required: false, type: String },
+    country: { required: false, type: String },
   },
   { timestamps: true },
 );
