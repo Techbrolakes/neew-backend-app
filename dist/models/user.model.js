@@ -43,8 +43,16 @@ const UserSchema = new mongoose_1.Schema({
     growthTrend: { required: false, type: String },
     industry: { required: false, type: String },
     interest: {
-        default: "general_interest",
-        enum: ["general_interest", "entrepreneur", "social_progress", "investors", "eco_system_builder"],
+        default: "general_public",
+        enum: [
+            "general_interest",
+            "entrepreneur",
+            "social_progress",
+            "investors",
+            "eco_system_builder",
+            "general_public",
+            "champions",
+        ],
         type: String,
     },
     lastName: { required: true, type: String },
