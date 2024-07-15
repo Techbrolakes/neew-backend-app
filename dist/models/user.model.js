@@ -64,11 +64,17 @@ const UserSchema = new mongoose_1.Schema({
     photo: { required: false, type: String },
     productMaturity: { required: false, type: String },
     revenue: { required: false, type: String },
-    sdgImpact: { required: false, type: String },
+    sdgImpact: {
+        default: [],
+        required: false,
+        type: [String],
+    },
     telephone: { required: false, type: String },
     traction: { required: false, type: String },
     usp: { required: false, type: String },
     website: { required: false, type: String },
+    city: { required: false, type: String },
+    country: { required: false, type: String },
 }, { timestamps: true });
 // A model type extending the mongoose Model interface
 exports.UserModel = mongoose_1.default.model("Users", UserSchema);
