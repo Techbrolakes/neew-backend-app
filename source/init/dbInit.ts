@@ -7,9 +7,9 @@ const currentDB = "mongodb+srv://lekandar:helloworld@neew-cluster.5wiort4.mongod
 async function connect(): Promise<typeof mongoose> {
   const m = await mongoose.connect(currentDB, {
     dbName: config.databaseName,
+    connectTimeoutMS: 20000,
+    socketTimeoutMS: 0,
   });
-  await mongoose.connection.syncIndexes();
-
   console.log("Connected to Database: ", currentDB);
   return m;
 }
