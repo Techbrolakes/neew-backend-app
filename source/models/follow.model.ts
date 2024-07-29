@@ -1,11 +1,11 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export interface IFollow {
   followerId: string;
   userId: string;
 }
 
-const schema = new Schema(
+const schema: Schema = new Schema(
   {
     followerId: { required: true, type: String },
     userId: { required: true, type: String },

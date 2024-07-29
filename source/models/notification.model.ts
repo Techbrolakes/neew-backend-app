@@ -1,17 +1,18 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export interface INotification {
   userId: string;
   message: string;
-  notificationType: "like" | "comment" | "follow";
+  notificationType: "like" | "comment" | "follow" | "message-invite" | "message" | "mentions";
   read: string;
+  postId?: string;
 }
 
 const schema = new Schema(
   {
     message: { required: true, type: String },
     notificationType: { required: true, type: String },
-
+    postId: { type: String },
     read: {
       default: "false",
       enum: ["false", "true"],

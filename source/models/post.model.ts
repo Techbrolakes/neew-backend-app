@@ -1,4 +1,4 @@
-import mongoose, { Schema, Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 export interface IPost {
   content: string;
@@ -8,24 +8,33 @@ export interface IPost {
   likesUsers: string[];
   comments: any[];
   numberOfComments: any;
+  mentions?: string[];
 }
 
 const commentSchema = new Schema({
   comment: { required: true, type: String },
-  post: { ref: "Post", type: Types.ObjectId },
-  user: { ref: "Users", type: Types.ObjectId },
+  mentions: [{ ref: "User", type: mongoose.Types.ObjectId }],
+  post: { ref: "Post", type: mongoose.Types.ObjectId },
+  replies: [
+    {
+      reply: { required: true, type: String },
+      user: { ref: "User", type: mongoose.Types.ObjectId },
+    },
+  ],
+  user: { ref: "User", type: mongoose.Types.ObjectId },
 });
 
-const schema = new Schema(
+const schema: Schema = new Schema(
   {
     comments: {
       default: [],
       type: [commentSchema],
     },
     content: { required: true, type: String },
-    creator: { ref: "Users", type: Types.ObjectId },
+    creator: { ref: "User", type: mongoose.Types.ObjectId },
     image: { type: String },
-    likesUsers: [{ ref: "Users", type: Types.ObjectId }],
+    likesUsers: [{ ref: "User", type: mongoose.Types.ObjectId }],
+    mentions: [{ ref: "User", type: mongoose.Types.ObjectId }],
     numberOfComments: { default: 0, type: Number },
     totalLikes: { default: 0, type: Number },
   },

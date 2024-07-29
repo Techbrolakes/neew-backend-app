@@ -28,6 +28,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const schema = new mongoose_1.Schema({
     message: { required: true, type: String },
     notificationType: { required: true, type: String },
+    postId: { type: String },
     read: {
         default: "false",
         enum: ["false", "true"],

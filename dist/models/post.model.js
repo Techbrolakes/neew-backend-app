@@ -27,8 +27,15 @@ exports.PostModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const commentSchema = new mongoose_1.Schema({
     comment: { required: true, type: String },
-    post: { ref: "Post", type: mongoose_1.Types.ObjectId },
-    user: { ref: "Users", type: mongoose_1.Types.ObjectId },
+    mentions: [{ ref: "User", type: mongoose_1.default.Types.ObjectId }],
+    post: { ref: "Post", type: mongoose_1.default.Types.ObjectId },
+    replies: [
+        {
+            reply: { required: true, type: String },
+            user: { ref: "User", type: mongoose_1.default.Types.ObjectId },
+        },
+    ],
+    user: { ref: "User", type: mongoose_1.default.Types.ObjectId },
 });
 const schema = new mongoose_1.Schema({
     comments: {
@@ -36,9 +43,10 @@ const schema = new mongoose_1.Schema({
         type: [commentSchema],
     },
     content: { required: true, type: String },
-    creator: { ref: "Users", type: mongoose_1.Types.ObjectId },
+    creator: { ref: "User", type: mongoose_1.default.Types.ObjectId },
     image: { type: String },
-    likesUsers: [{ ref: "Users", type: mongoose_1.Types.ObjectId }],
+    likesUsers: [{ ref: "User", type: mongoose_1.default.Types.ObjectId }],
+    mentions: [{ ref: "User", type: mongoose_1.default.Types.ObjectId }],
     numberOfComments: { default: 0, type: Number },
     totalLikes: { default: 0, type: Number },
 }, { timestamps: true });
