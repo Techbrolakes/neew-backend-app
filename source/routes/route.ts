@@ -16,19 +16,20 @@ router.post("/auth/login", authService.login);
 router.post("/auth/register", authService.register);
 router.post("/auth/reset-password", authService.resetPassword);
 
-router.get("/posts", postService.list);
-router.get("/post/get-all-posts", postService.getPosts);
 router.put("/post/edit", postService.edit);
 router.get("/post/:postId", postService.get);
 router.post("/post/create", postService.create);
 router.post("/post/add-like", postService.addLike);
+router.get("/post/user-posts", postService.userPosts);
+router.get("/post/all-posts", postService.getPosts);
 router.post("/post/add-comment", postService.addComment);
+router.post("/post/reply-comment", postService.replyComment);
 router.delete("/post/delete/:postId", postService.deletePost);
 router.get("/post/get-likes-users/:postId", postService.getLikesUsers);
 
-router.post("/message-invite/create", messageInviteService.create);
-router.put("/message-invite/status", messageInviteService.put);
 router.get("/message-invite/list", messageInviteService.list);
+router.put("/message-invite/status", messageInviteService.put);
+router.post("/message-invite/create", messageInviteService.create);
 
 router.get("/message/seen", messageService.seen);
 router.post("/message/create", messageService.post);

@@ -39,6 +39,7 @@ async function likePost({ postId, userId }: LikePost): Promise<IPostDocument | n
     await NotificationModel.create({
       message: `New like on your post`,
       notificationType: "like",
+      postId: post._id,
       userId,
     });
   }
@@ -72,15 +73,17 @@ type AddComment = {
   postId: Types.ObjectId;
   comment: string;
   userId: Types.ObjectId;
+  mentions?: Types.ObjectId[];
 };
 
-async function addComment({ postId, comment, userId }: AddComment): Promise<IPostDocument | null> {
+async function addComment({ postId, comment, userId, mentions }: AddComment): Promise<IPostDocument | null> {
   const post = await PostModel.findById(postId);
 
   const newComment = {
     comment,
     user: userId,
     post: postId,
+    mentions,
   };
 
   if (newComment) {
@@ -92,6 +95,15 @@ async function addComment({ postId, comment, userId }: AddComment): Promise<IPos
   }
 
   post.comments.push(newComment);
+
+  if (newComment) {
+    await NotificationModel.create({
+      message: `New comment on your post`,
+      notificationType: "comment",
+      postId: post._id,
+      userId,
+    });
+  }
 
   // increment the number of comments
   post.numberOfComments = post.numberOfComments + 1;
@@ -119,10 +131,6 @@ async function getAllPosts(req: express.Request): Promise<IPostDocument[] | null
   const [posts, total] = await Promise.all([
     PostModel.find()
       .sort({ createdAt: -1 })
-      .populate({
-        path: "creator",
-        select: "name email image",
-      })
       .limit(perpage)
       .skip(page * perpage - perpage)
       .lean(),
@@ -151,10 +159,8 @@ async function find(req: express.Request, userId: Types.ObjectId): Promise<IPost
   const [posts, total] = await Promise.all([
     PostModel.find(filterQuery)
       .sort({ createdAt: -1 })
-      .populate({
-        path: "creator",
-        select: "name email image",
-      })
+      .populate("creator", "firstName lastName photo persona")
+      .populate("mentions", "firstName lastName")
       .limit(perpage)
       .skip(page * perpage - perpage)
       .lean(),

@@ -13,9 +13,70 @@ const post_core_1 = __importDefault(require("../core/post.core"));
 const express_validator_2 = require("express-validator");
 const mongoose_1 = require("mongoose");
 const utils_1 = require("../utils");
+const notification_model_1 = require("../models/notification.model");
 const debug = (0, debug_1.default)("project:post.service");
+const replyComment = [
+    auth_mw_1.default,
+    (0, express_validator_1.body)("commentId").isMongoId().withMessage("CommentId must be a valid id"),
+    (0, express_validator_1.body)("reply").isString().withMessage("Reply must be a string"),
+    (0, express_validator_1.body)("postId").isMongoId().withMessage("PostId must be a valid id"),
+    validator_mw_1.validateResult,
+    async (req, res) => {
+        try {
+            const user = (0, utils_1.throwIfUndefined)(req.user, "req.user");
+            const post = await post_core_1.default.getPostById(req.body.postId);
+            if (!post) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
+                    error: "Post not found",
+                });
+            }
+            let commentFound = false;
+            // Find the comment and add the reply
+            post.comments.forEach((comment) => {
+                if (comment._id.toString() === req.body.commentId) {
+                    comment.replies.push({
+                        reply: req.body.reply,
+                        user: user.id,
+                    });
+                    commentFound = true;
+                }
+            });
+            if (!commentFound) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
+                    error: "Comment not found",
+                });
+            }
+            if (commentFound) {
+                await notification_model_1.NotificationModel.create({
+                    message: `New reply on your comment`,
+                    notificationType: "reply",
+                    postId: post._id,
+                    userId: user.id,
+                });
+            }
+            await post.save();
+            return response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.CREATED,
+                message: "Reply added",
+            });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
+                error: `${error}`,
+            });
+        }
+    },
+];
 const getLikesUsers = [
     auth_mw_1.default,
+    (0, express_validator_1.param)("postId").isMongoId().withMessage("PostId must be a valid id"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
@@ -145,6 +206,7 @@ const addComment = [
     auth_mw_1.default,
     (0, express_validator_1.body)("postId").isString().withMessage("PostId must be a string"),
     (0, express_validator_1.body)("comment").isString().withMessage("Comment must be a string"),
+    (0, express_validator_1.body)("mentions").isArray().optional().withMessage("Mentions must be an array"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
@@ -168,7 +230,23 @@ const addComment = [
                 postId: req.body.postId,
                 comment: req.body.comment,
                 userId: new mongoose_1.Types.ObjectId(user.id),
+                mentions: req.body.mentions,
             });
+            if (comment) {
+                // loop through mentions and create notification
+                if (req.data.mentions && req.data.mentions.length > 0) {
+                    const notifications = req.data.mentions.map(async (mention) => {
+                        const notification = await notification_model_1.NotificationModel.create({
+                            message: `${user.firstName} ${user.lastName} mentioned you in a comment`,
+                            notificationType: "mentions",
+                            read: "false",
+                            userId: mention,
+                        });
+                        return notification;
+                    });
+                    await Promise.all(notifications);
+                }
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.CREATED,
@@ -192,10 +270,17 @@ const get = [
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
             const postId = new mongoose_1.Types.ObjectId(req.params.postId);
             const post = await post_core_1.default.getPostById(postId);
+            if (!post) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
+                    error: "Post not found",
+                });
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
-                message: "Post fetched successfully",
+                message: "Post fetched",
                 data: post,
             });
         }
@@ -237,7 +322,7 @@ const create = [
         }
     },
 ];
-const list = [
+const userPosts = [
     auth_mw_1.default,
     (0, express_validator_2.query)("perpage").isNumeric().withMessage("Perpage must be a number").optional(),
     (0, express_validator_2.query)("page").isNumeric().withMessage("Page must be a number").optional(),
@@ -252,7 +337,7 @@ const list = [
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
-                message: "Users fetched successfully",
+                message: "Post fetched",
                 ...posts,
             });
         }
@@ -290,14 +375,15 @@ const getPosts = [
     },
 ];
 exports.default = {
-    list,
+    userPosts,
     create,
-    getPosts,
     get,
     addComment,
     edit,
     deletePost,
     addLike,
     getLikesUsers,
+    replyComment,
+    getPosts,
 };
 //# sourceMappingURL=post.service.js.map

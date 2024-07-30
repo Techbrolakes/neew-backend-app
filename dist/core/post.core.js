@@ -26,6 +26,7 @@ async function likePost({ postId, userId }) {
         await notification_model_1.NotificationModel.create({
             message: `New like on your post`,
             notificationType: "like",
+            postId: post._id,
             userId,
         });
     }
@@ -41,12 +42,13 @@ async function edit({ postId, content, image }) {
     post.image = image;
     return post.save();
 }
-async function addComment({ postId, comment, userId }) {
+async function addComment({ postId, comment, userId, mentions }) {
     const post = await post_model_1.PostModel.findById(postId);
     const newComment = {
         comment,
         user: userId,
         post: postId,
+        mentions,
     };
     if (newComment) {
         await notification_model_1.NotificationModel.create({
@@ -56,6 +58,14 @@ async function addComment({ postId, comment, userId }) {
         });
     }
     post.comments.push(newComment);
+    if (newComment) {
+        await notification_model_1.NotificationModel.create({
+            message: `New comment on your post`,
+            notificationType: "comment",
+            postId: post._id,
+            userId,
+        });
+    }
     // increment the number of comments
     post.numberOfComments = post.numberOfComments + 1;
     // Save the updated post
@@ -77,10 +87,6 @@ async function getAllPosts(req) {
     const [posts, total] = await Promise.all([
         post_model_1.PostModel.find()
             .sort({ createdAt: -1 })
-            .populate({
-            path: "creator",
-            select: "name email image",
-        })
             .limit(perpage)
             .skip(page * perpage - perpage)
             .lean(),
@@ -103,10 +109,8 @@ async function find(req, userId) {
     const [posts, total] = await Promise.all([
         post_model_1.PostModel.find(filterQuery)
             .sort({ createdAt: -1 })
-            .populate({
-            path: "creator",
-            select: "name email image",
-        })
+            .populate("creator", "firstName lastName photo persona")
+            .populate("mentions", "firstName lastName")
             .limit(perpage)
             .skip(page * perpage - perpage)
             .lean(),
