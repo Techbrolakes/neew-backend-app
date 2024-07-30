@@ -3,7 +3,6 @@ import express, { Express } from "express";
 import morgan from "morgan";
 
 import route from "../routes/route";
-import adminRoute from "../routes/adminRoute";
 import testRoute from "../routes/testRoute";
 
 function middlewareNotFound(req: express.Request, res: express.Response, next: express.NextFunction) {
@@ -42,7 +41,6 @@ function setupExpress(app: Express) {
   const port = normalizePort(process.env.PORT || "9001");
 
   app.use("/api", route);
-  app.use("/api/admin", adminRoute);
 
   if (process.env.NODE_ENV === "test") {
     app.use("/api/test", testRoute);

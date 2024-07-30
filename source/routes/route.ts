@@ -8,11 +8,13 @@ import notificationService from "../services/notification.service";
 import messageInviteService from "../services/messageInvite.service";
 import messageService from "../services/message.service";
 import conversationService from "../services/conversation.service";
+import profileService from "../services/profile.service";
 
 const router = express.Router();
 
 router.post("/auth/login", authService.login);
 router.post("/auth/register", authService.register);
+router.post("/auth/reset-password", authService.resetPassword);
 
 router.get("/posts", postService.list);
 router.get("/post/get-all-posts", postService.getPosts);
@@ -24,9 +26,9 @@ router.post("/post/add-comment", postService.addComment);
 router.delete("/post/delete/:postId", postService.deletePost);
 router.get("/post/get-likes-users/:postId", postService.getLikesUsers);
 
-router.post("/message-invites/create", messageInviteService.create);
+router.post("/message-invite/create", messageInviteService.create);
 router.put("/message-invite/status", messageInviteService.put);
-router.get("/message-invites/list", messageInviteService.list);
+router.get("/message-invite/list", messageInviteService.list);
 
 router.get("/message/seen", messageService.seen);
 router.post("/message/create", messageService.post);
@@ -34,9 +36,11 @@ router.post("/message/create", messageService.post);
 router.get("/conversation/list", conversationService.list);
 router.get("/conversation/:conversationId", conversationService.get);
 
-router.get("/user/me", userService.me);
 router.get("/users", userService.getAllUsers);
 router.get("/user/entreprenuers", userService.getEntreprenuers);
+
+router.get("/profile/me", profileService.me);
+router.put("/profile/update", profileService.update);
 
 router.post("/user/follow", followService.followUser);
 router.get("/user/followers/:userId", followService.getFollowers);

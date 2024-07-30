@@ -49,5 +49,5 @@ const UserSchema = new mongoose_1.default.Schema({
     website: { required: false, type: String }, // Add this field
 }, { timestamps: true });
 // A model type extending the mongoose Model interface
-exports.UserModel = mongoose_1.default.model("Users", UserSchema);
+exports.UserModel = mongoose_1.default.model("User", UserSchema);
 //# sourceMappingURL=user.model.js.map

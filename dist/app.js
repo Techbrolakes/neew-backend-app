@@ -6,13 +6,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.startPromise = void 0;
 require("source-map-support/register");
 const express_1 = __importDefault(require("express"));
+const http_1 = __importDefault(require("http"));
 const dbInit_1 = __importDefault(require("./init/dbInit"));
 const expressInit_1 = __importDefault(require("./init/expressInit"));
+const socket_1 = __importDefault(require("./socket"));
 const app = (0, express_1.default)();
+const server = http_1.default.createServer(app);
 async function start() {
     await dbInit_1.default.connect();
     expressInit_1.default.setupExpress(app);
 }
+// Initialize Socket.IO
+(0, socket_1.default)(server);
 exports.startPromise = start();
 exports.default = app;
 //# sourceMappingURL=app.js.map

@@ -118,32 +118,8 @@ const getEntreprenuers = [
   },
 ];
 
-const me = [
-  authMw,
-  async (req: express.Request, res: express.Response) => {
-    try {
-      const user = throwIfUndefined(req.user, "req.user");
-
-      const currentUser = await UserModel.findById(user.id).select("-password").lean(true);
-
-      return ResponseHandler.sendSuccessResponse({
-        res,
-        code: HTTP_CODES.OK,
-        message: "User fetched successfully",
-        data: currentUser,
-      });
-    } catch (error: any) {
-      return ResponseHandler.sendErrorResponse({
-        res,
-        code: HTTP_CODES.INTERNAL_SERVER_ERROR,
-        error: `${error}`,
-      });
-    }
-  },
-];
 
 export default {
   getEntreprenuers,
-  me,
   getAllUsers,
 };

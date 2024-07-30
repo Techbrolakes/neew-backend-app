@@ -105,31 +105,8 @@ const getEntreprenuers = [
         }
     },
 ];
-const me = [
-    auth_mw_1.default,
-    async (req, res) => {
-        try {
-            const user = (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const currentUser = await user_model_1.UserModel.findById(user.id).select("-password").lean(true);
-            return response_handler_1.default.sendSuccessResponse({
-                res,
-                code: appDefaults_constant_1.HTTP_CODES.OK,
-                message: "User fetched successfully",
-                data: currentUser,
-            });
-        }
-        catch (error) {
-            return response_handler_1.default.sendErrorResponse({
-                res,
-                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
-                error: `${error}`,
-            });
-        }
-    },
-];
 exports.default = {
     getEntreprenuers,
-    me,
     getAllUsers,
 };
 //# sourceMappingURL=user.service.js.map

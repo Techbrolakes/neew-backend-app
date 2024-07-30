@@ -87,4 +87,4 @@ const UserSchema = new mongoose.Schema(
 export interface IUserDocument extends mongoose.Document, IUser {}
 
 // A model type extending the mongoose Model interface
-export const UserModel = mongoose.model<IUserDocument>("Users", UserSchema);
+export const UserModel = mongoose.model<IUserDocument>("User", UserSchema);

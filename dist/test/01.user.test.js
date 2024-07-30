@@ -35,7 +35,7 @@ describe("User Test", async () => {
             password: "Testing123",
             firstName: "David",
             lastName: "Bajomo",
-            interest: "investors",
+            interest: "investor",
             location: "Paris, France",
         });
         if (res.error) {
@@ -86,7 +86,7 @@ describe("User Test", async () => {
     });
     it("Get Me - Ola", async () => {
         const res = await (0, supertest_1.default)(app_1.default) //
-            .get("/api/user/me")
+            .get("/api/profile/me")
             .set("x-auth-token", testData_1.default.userOla.token);
         if (res.error) {
             console.error(res.error);
@@ -101,7 +101,7 @@ describe("User Test", async () => {
     });
     it("Get Me - David", async () => {
         const res = await (0, supertest_1.default)(app_1.default) //
-            .get("/api/user/me")
+            .get("/api/profile/me")
             .set("x-auth-token", testData_1.default.userDavid.token);
         if (res.error) {
             console.error(res.error);
@@ -111,7 +111,7 @@ describe("User Test", async () => {
         res.body.data.firstName.should.equal("david");
         res.body.data.lastName.should.equal("bajomo");
         res.body.data.email.should.equal("bajomodavid18@gmail.com");
-        res.body.data.interest.should.equal("investors");
+        res.body.data.interest.should.equal("investor");
         res.body.data.location.should.equal("Paris, France");
     });
 });

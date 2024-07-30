@@ -28,7 +28,7 @@ const list = [
       return ResponseHandler.sendSuccessResponse({
         res,
         code: HTTP_CODES.OK,
-        message: "",
+        message: "Message Invites fetched",
         data: messageInvites,
       });
     } catch (error: any) {
@@ -43,6 +43,8 @@ const list = [
 
 const put = [
   authMw,
+  body("inviteId").isString().withMessage("Invite Id must be a string"),
+  body("inviteStatus").isString().withMessage("Invite Status must be a string"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
@@ -55,14 +57,6 @@ const put = [
           res,
           code: HTTP_CODES.NOT_FOUND,
           error: "Message invite not found",
-        });
-      }
-
-      if (messageInvite.receiver.toString() !== user.id) {
-        return ResponseHandler.sendErrorResponse({
-          res,
-          code: HTTP_CODES.UNAUTHORIZED,
-          error: "Unauthorized",
         });
       }
 

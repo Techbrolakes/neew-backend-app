@@ -26,6 +26,7 @@ const list = [
         .populate("users", "firstName lastName email photo")
         .sort({ updatedAt: -1 });
 
+        
       if (!conversations.length) {
         return ResponseHandler.sendErrorResponse({
           res,

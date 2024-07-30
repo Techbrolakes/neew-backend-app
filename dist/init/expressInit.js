@@ -7,7 +7,6 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const morgan_1 = __importDefault(require("morgan"));
 const route_1 = __importDefault(require("../routes/route"));
-const adminRoute_1 = __importDefault(require("../routes/adminRoute"));
 const testRoute_1 = __importDefault(require("../routes/testRoute"));
 function middlewareNotFound(req, res, next) {
     const err = new Error("Not Found: " + req.url);
@@ -35,7 +34,6 @@ function setupExpress(app) {
     app.use((0, cors_1.default)());
     const port = normalizePort(process.env.PORT || "9001");
     app.use("/api", route_1.default);
-    app.use("/api/admin", adminRoute_1.default);
     if (process.env.NODE_ENV === "test") {
         app.use("/api/test", testRoute_1.default);
     }
