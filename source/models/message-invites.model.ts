@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 export interface IMessageInvite {
-  sender: string;
-  receiver: string;
+  sender: string | Types.ObjectId;
+  receiver: string | Types.ObjectId;
   inviteStatus: "pending" | "accepted" | "rejected";
 }
 

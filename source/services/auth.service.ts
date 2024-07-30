@@ -1,12 +1,13 @@
 import express from "express";
 import Debug from "debug";
-import UserCore from "../../core/user.core";
-import { validateResult } from "../../middleware/validator.mw";
+import UserCore from "../core/user.core";
+import { validateResult } from "../middleware/validator.mw";
 import { body } from "express-validator";
-import ResponseHandler from "../../utils/response-handler";
-import { HTTP_CODES } from "../../constants/appDefaults.constant";
+import ResponseHandler from "../utils/response-handler";
+import { HTTP_CODES } from "../constants/appDefaults.constant";
 import bcrypt from "bcrypt";
-import { generateToken } from "../../utils";
+import { generateToken } from "../utils";
+import { UserModel } from "../models/user.model";
 
 const debug = Debug("project:user.service");
 
@@ -161,7 +162,45 @@ const register = [
   },
 ];
 
+const resetPassword = [
+  body("email").isEmail().withMessage("Invalid email"),
+  body("password").isString().exists().withMessage("Invalid password"),
+  validateResult,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const existingUser = await UserCore.getByEmail(req.body.email);
+
+      if (existingUser) {
+        return ResponseHandler.sendErrorResponse({
+          res,
+          code: HTTP_CODES.CONFLICT,
+          error: "This email is already taken",
+        });
+      }
+
+      //  Hash the password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+      await UserModel.findOneAndUpdate({ email: req.data.email }, { password: hashedPassword });
+
+      return ResponseHandler.sendSuccessResponse({
+        res,
+        code: HTTP_CODES.OK,
+        message: "Password reset successful",
+      });
+    } catch (error: any) {
+      return ResponseHandler.sendErrorResponse({
+        res,
+        code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+        error: `${error}`,
+      });
+    }
+  },
+];
+
 export default {
   register,
   login,
+  resetPassword,
 };

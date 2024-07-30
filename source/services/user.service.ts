@@ -1,11 +1,11 @@
 import express from "express";
 import Debug from "debug";
-import { validateResult } from "../../middleware/validator.mw";
-import { UserModel } from "../../models/user.model";
-import authMw from "../../middleware/auth.mw";
-import ResponseHandler from "../../utils/response-handler";
-import { HTTP_CODES } from "../../constants/appDefaults.constant";
-import { paginationUtil, throwIfUndefined } from "../../utils";
+import { validateResult } from "../middleware/validator.mw";
+import { UserModel } from "../models/user.model";
+import authMw from "../middleware/auth.mw";
+import ResponseHandler from "../utils/response-handler";
+import { HTTP_CODES } from "../constants/appDefaults.constant";
+import { paginationUtil, throwIfUndefined } from "../utils";
 import { query } from "express-validator";
 
 const debug = Debug("project:user.service");

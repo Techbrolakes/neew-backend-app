@@ -1,14 +1,14 @@
 import express from "express";
 import Debug from "debug";
-import { validateResult } from "../../middleware/validator.mw";
+import { validateResult } from "../middleware/validator.mw";
 import { body } from "express-validator";
-import ResponseHandler from "../../utils/response-handler";
-import { HTTP_CODES } from "../../constants/appDefaults.constant";
-import authMw from "../../middleware/auth.mw";
-import PostCore from "../../core/post.core";
+import ResponseHandler from "../utils/response-handler";
+import { HTTP_CODES } from "../constants/appDefaults.constant";
+import authMw from "../middleware/auth.mw";
+import PostCore from "../core/post.core";
 import { query } from "express-validator";
 import { Types } from "mongoose";
-import { throwIfUndefined } from "../../utils";
+import { throwIfUndefined } from "../utils";
 
 const debug = Debug("project:post.service");
 

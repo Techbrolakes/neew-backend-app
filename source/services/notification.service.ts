@@ -1,14 +1,11 @@
 import express from "express";
 import Debug from "debug";
-import { validateResult } from "../../middleware/validator.mw";
-import { UserModel } from "../../models/user.model";
-import { FollowModel } from "../../models/follow.model";
-import { NotificationModel } from "../../models/notification.model";
-import authMw from "../../middleware/auth.mw";
-import ResponseHandler from "../../utils/response-handler";
-import { HTTP_CODES } from "../../constants/appDefaults.constant";
-import { throwIfUndefined } from "../../utils";
-import { body, query } from "express-validator";
+import { validateResult } from "../middleware/validator.mw";
+import { NotificationModel } from "../models/notification.model";
+import authMw from "../middleware/auth.mw";
+import ResponseHandler from "../utils/response-handler";
+import { HTTP_CODES } from "../constants/appDefaults.constant";
+import { throwIfUndefined } from "../utils";
 
 const debug = Debug("project:notification.service");
 

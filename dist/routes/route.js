@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const auth_service_1 = __importDefault(require("../services/user/auth.service"));
-const post_service_1 = __importDefault(require("../services/user/post.service"));
-const user_service_1 = __importDefault(require("../services/user/user.service"));
-const follow_service_1 = __importDefault(require("../services/user/follow.service"));
-const notification_service_1 = __importDefault(require("../services/user/notification.service"));
+const follow_service_1 = __importDefault(require("../services/follow.service"));
+const auth_service_1 = __importDefault(require("../services/auth.service"));
+const post_service_1 = __importDefault(require("../services/post.service"));
+const user_service_1 = __importDefault(require("../services/user.service"));
+const notification_service_1 = __importDefault(require("../services/notification.service"));
 const router = express_1.default.Router();
 router.post("/auth/login", auth_service_1.default.login);
 router.post("/auth/register", auth_service_1.default.register);

@@ -1,9 +1,9 @@
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 export interface IMessage {
   text: string;
   image: string;
-  conversationId: string;
+  conversationId: string | Types.ObjectId;
   senderId: string;
   status: "delivered" | "seen"; // Status field with possible values
 }
