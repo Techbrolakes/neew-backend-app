@@ -5,15 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const config_1 = __importDefault(require("../utils/config"));
-// "mongodb+srv://lekandar:helloworld@neew-cluster.5wiort4.mongodb.net/" ||
-const currentDB = config_1.default.database;
 async function connect() {
-    const m = await mongoose_1.default.connect(currentDB, {
+    const m = await mongoose_1.default.connect(config_1.default.database, {
         dbName: config_1.default.databaseName,
         connectTimeoutMS: 20000,
         socketTimeoutMS: 0,
     });
-    console.log("Connected to Database: ", currentDB);
+    console.log("Connected to Database: ", config_1.default.database);
     return m;
 }
 exports.default = {

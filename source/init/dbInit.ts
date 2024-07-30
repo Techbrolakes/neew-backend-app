@@ -2,17 +2,13 @@ import mongoose from "mongoose";
 
 import config from "../utils/config";
 
-// "mongodb+srv://lekandar:helloworld@neew-cluster.5wiort4.mongodb.net/" ||
-
-const currentDB = config.database;
-
 async function connect(): Promise<typeof mongoose> {
-  const m = await mongoose.connect(currentDB, {
+  const m = await mongoose.connect(config.database, {
     dbName: config.databaseName,
     connectTimeoutMS: 20000,
     socketTimeoutMS: 0,
   });
-  console.log("Connected to Database: ", currentDB);
+  console.log("Connected to Database: ", config.database);
   return m;
 }
 

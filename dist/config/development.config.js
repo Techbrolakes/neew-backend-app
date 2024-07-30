@@ -6,9 +6,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = __importDefault(require("path"));
 const config = {
     env: "development",
-    database: "mongodb://api:paSs!!2827@herdb-dev.hishk.com:27017/admin",
-    databaseName: "admin",
-    frontUrl: "https://neew-frontend-app2.vercel.app/",
+    database: "mongodb+srv://lekandar:helloworld@neew-cluster.5wiort4.mongodb.net/",
+    databaseName: "neew-database",
+    frontUrl: "https://neew-frontend-app.vercel.app/",
     imageFolder: path_1.default.join(__dirname, "..", // src
     "..", // root
     "media"),
