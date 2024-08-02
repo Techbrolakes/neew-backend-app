@@ -152,12 +152,10 @@ async function find(req: express.Request, userId: Types.ObjectId): Promise<IPost
   const perpage = Number(query.perpage) || 10; // Set the number of records to return
   const page = Number(query.page) || 1; // Set the page number
 
-  const filterQuery: any = {
-    creator: userId,
-  };
-
   const [posts, total] = await Promise.all([
-    PostModel.find(filterQuery)
+    PostModel.find({
+      creator: userId,
+    })
       .sort({ createdAt: -1 })
       .populate("creator", "firstName lastName photo persona")
       .populate("mentions", "firstName lastName")
@@ -165,7 +163,9 @@ async function find(req: express.Request, userId: Types.ObjectId): Promise<IPost
       .skip(page * perpage - perpage)
       .lean(),
 
-    PostModel.countDocuments(filterQuery),
+    PostModel.countDocuments({
+      creator: userId,
+    }),
   ]);
 
   const pagination = await paginationUtil({ total, page, perpage });

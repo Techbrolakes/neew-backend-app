@@ -15,13 +15,14 @@ const router = express.Router();
 router.post("/auth/login", authService.login);
 router.post("/auth/register", authService.register);
 router.post("/auth/reset-password", authService.resetPassword);
+router.post("/auth/check-email", authService.checkEmail);
 
 router.put("/post/edit", postService.edit);
 router.get("/post/:postId", postService.get);
 router.post("/post/create", postService.create);
 router.post("/post/add-like", postService.addLike);
-router.get("/post/user-posts", postService.userPosts);
-router.get("/post/all-posts", postService.getPosts);
+router.get("/posts/list", postService.getPosts);
+router.get("/posts/user-posts/:userId", postService.userPosts);
 router.post("/post/add-comment", postService.addComment);
 router.post("/post/reply-comment", postService.replyComment);
 router.delete("/post/delete/:postId", postService.deletePost);
@@ -36,6 +37,8 @@ router.post("/message/create", messageService.post);
 
 router.get("/conversation/list", conversationService.list);
 router.get("/conversation/:conversationId", conversationService.get);
+
+router.get("/posts/list", postService.getPosts);
 
 router.get("/users", userService.getAllUsers);
 router.get("/user/entreprenuers", userService.getEntreprenuers);

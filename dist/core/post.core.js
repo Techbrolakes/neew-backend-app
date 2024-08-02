@@ -103,18 +103,19 @@ async function find(req, userId) {
     const { query } = req; // Get the query params from the request object
     const perpage = Number(query.perpage) || 10; // Set the number of records to return
     const page = Number(query.page) || 1; // Set the page number
-    const filterQuery = {
-        creator: userId,
-    };
     const [posts, total] = await Promise.all([
-        post_model_1.PostModel.find(filterQuery)
+        post_model_1.PostModel.find({
+            creator: userId,
+        })
             .sort({ createdAt: -1 })
             .populate("creator", "firstName lastName photo persona")
             .populate("mentions", "firstName lastName")
             .limit(perpage)
             .skip(page * perpage - perpage)
             .lean(),
-        post_model_1.PostModel.countDocuments(filterQuery),
+        post_model_1.PostModel.countDocuments({
+            creator: userId,
+        }),
     ]);
     const pagination = await (0, utils_1.paginationUtil)({ total, page, perpage });
     return {

@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 export interface IPost {
   content: string;
   image?: string;
-  creator: string;
+  creator: string | any;
   totalLikes: number;
   likesUsers: string[];
   comments: any[];

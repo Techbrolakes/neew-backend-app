@@ -324,16 +324,13 @@ const create = [
 ];
 const userPosts = [
     auth_mw_1.default,
-    (0, express_validator_2.query)("perpage").isNumeric().withMessage("Perpage must be a number").optional(),
-    (0, express_validator_2.query)("page").isNumeric().withMessage("Page must be a number").optional(),
-    (0, express_validator_2.query)("dateFrom").isString().withMessage("DateFrom must be a string").optional(),
-    (0, express_validator_2.query)("dateTo").isString().withMessage("DateTo must be a string").optional(),
-    (0, express_validator_2.query)("period").isString().withMessage("Period must be a string").optional(),
+    (0, express_validator_1.param)("userId").isMongoId().withMessage("userId must be a valid id"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
-            const user = (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const posts = await post_core_1.default.find(req, new mongoose_1.Types.ObjectId(user.id));
+            (0, utils_1.throwIfUndefined)(req.user, "req.user");
+            console.log(req.data.userId);
+            const posts = await post_core_1.default.find(req, req.data.userId);
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,

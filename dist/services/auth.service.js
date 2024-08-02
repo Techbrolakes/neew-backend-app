@@ -63,8 +63,9 @@ const register = [
     (0, express_validator_1.body)("firstName").isString().withMessage("Invalid first name"),
     (0, express_validator_1.body)("lastName").isString().withMessage("Invalid last name"),
     (0, express_validator_1.body)("password").isString().withMessage("Invalid password"),
-    (0, express_validator_1.body)("interest").isString().withMessage("Invalid interest"),
+    (0, express_validator_1.body)("interest").isArray().withMessage("Invalid interest"),
     (0, express_validator_1.body)("location").isString().withMessage("Invalid location"),
+    (0, express_validator_1.body)("industry").isArray().withMessage("Invalid industry"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
@@ -141,9 +142,38 @@ const resetPassword = [
         }
     },
 ];
+const checkEmail = [
+    (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email"),
+    validator_mw_1.validateResult,
+    async (req, res) => {
+        try {
+            const user = await user_core_1.default.getByEmail(req.body.email);
+            if (user) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
+                    error: "Email already exist",
+                });
+            }
+            return response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.CREATED,
+                message: "Success",
+            });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
+                error: `${error}`,
+            });
+        }
+    },
+];
 exports.default = {
     register,
     login,
     resetPassword,
+    checkEmail,
 };
 //# sourceMappingURL=auth.service.js.map

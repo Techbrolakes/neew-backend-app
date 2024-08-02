@@ -358,16 +358,15 @@ const create = [
 
 const userPosts = [
   authMw,
-  query("perpage").isNumeric().withMessage("Perpage must be a number").optional(),
-  query("page").isNumeric().withMessage("Page must be a number").optional(),
-  query("dateFrom").isString().withMessage("DateFrom must be a string").optional(),
-  query("dateTo").isString().withMessage("DateTo must be a string").optional(),
-  query("period").isString().withMessage("Period must be a string").optional(),
+  param("userId").isMongoId().withMessage("userId must be a valid id"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
-      const user = throwIfUndefined(req.user, "req.user");
-      const posts = await PostCore.find(req, new Types.ObjectId(user.id));
+      throwIfUndefined(req.user, "req.user");
+
+      console.log(req.data.userId);
+
+      const posts = await PostCore.find(req, req.data.userId);
 
       return ResponseHandler.sendSuccessResponse({
         res,
@@ -409,7 +408,6 @@ const getPosts = [
     }
   },
 ];
-
 
 export default {
   userPosts,

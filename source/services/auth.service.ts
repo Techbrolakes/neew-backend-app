@@ -29,6 +29,7 @@ const login = [
 
       // Compare the passwords
       const result = bcrypt.compareSync(req.body.password, user?.password!);
+
       if (!result) {
         return ResponseHandler.sendErrorResponse({
           res,
@@ -65,8 +66,9 @@ const register = [
   body("firstName").isString().withMessage("Invalid first name"),
   body("lastName").isString().withMessage("Invalid last name"),
   body("password").isString().withMessage("Invalid password"),
-  body("interest").isString().withMessage("Invalid interest"),
+  body("interest").isArray().withMessage("Invalid interest"),
   body("location").isString().withMessage("Invalid location"),
+  body("industry").isArray().withMessage("Invalid industry"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
@@ -151,8 +153,39 @@ const resetPassword = [
   },
 ];
 
+const checkEmail = [
+  body("email").isEmail().withMessage("Invalid email"),
+  validateResult,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const user = await UserCore.getByEmail(req.body.email);
+
+      if (user) {
+        return ResponseHandler.sendErrorResponse({
+          res,
+          code: HTTP_CODES.NOT_FOUND,
+          error: "Email already exist",
+        });
+      }
+
+      return ResponseHandler.sendSuccessResponse({
+        res,
+        code: HTTP_CODES.CREATED,
+        message: "Success",
+      });
+    } catch (error: any) {
+      return ResponseHandler.sendErrorResponse({
+        res,
+        code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+        error: `${error}`,
+      });
+    }
+  },
+];
+
 export default {
   register,
   login,
   resetPassword,
+  checkEmail,
 };
