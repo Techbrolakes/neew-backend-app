@@ -10,6 +10,7 @@ import { query } from "express-validator";
 import { Types } from "mongoose";
 import { throwIfUndefined } from "../utils";
 import { NotificationModel } from "../models/notification.model";
+import { PostModel } from "../models/post.model";
 
 const debug = Debug("project:post.service");
 
@@ -23,7 +24,7 @@ const replyComment = [
     try {
       const user = throwIfUndefined(req.user, "req.user");
 
-      const post = await PostCore.getPostById(req.body.postId);
+      const post = await PostModel.findById(req.body.postId);
 
       if (!post) {
         return ResponseHandler.sendErrorResponse({
@@ -54,6 +55,7 @@ const replyComment = [
         });
       }
 
+      // Create a notification for the reply
       if (commentFound) {
         await NotificationModel.create({
           message: `New reply on your comment`,
@@ -63,7 +65,8 @@ const replyComment = [
         });
       }
 
-      await post.save();
+      // Update the post document in the database
+      await PostModel.updateOne({ _id: req.body.postId }, { $set: { comments: post.comments } });
 
       return ResponseHandler.sendSuccessResponse({
         res,

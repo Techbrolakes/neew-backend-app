@@ -6,9 +6,35 @@ import authMw from "../middleware/auth.mw";
 import ResponseHandler from "../utils/response-handler";
 import { HTTP_CODES } from "../constants/appDefaults.constant";
 import { paginationUtil, throwIfUndefined } from "../utils";
-import { query } from "express-validator";
+import { param, query } from "express-validator";
 
 const debug = Debug("project:user.service");
+
+const getUser = [
+  authMw,
+  param("userId").isMongoId().withMessage("userId must be a valid id"),
+  validateResult,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      throwIfUndefined(req.user, "req.user");
+
+      const user = await UserModel.findById(req.data.userId).select("-password").lean(true);
+
+      return ResponseHandler.sendSuccessResponse({
+        res,
+        code: HTTP_CODES.OK,
+        message: "User fetched",
+        data: user,
+      });
+    } catch (error: any) {
+      return ResponseHandler.sendErrorResponse({
+        res,
+        code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+        error: `${error}`,
+      });
+    }
+  },
+];
 
 const getAllUsers = [
   authMw,
@@ -118,8 +144,8 @@ const getEntreprenuers = [
   },
 ];
 
-
 export default {
   getEntreprenuers,
   getAllUsers,
+  getUser,
 };

@@ -12,6 +12,30 @@ const appDefaults_constant_1 = require("../constants/appDefaults.constant");
 const utils_1 = require("../utils");
 const express_validator_1 = require("express-validator");
 const debug = (0, debug_1.default)("project:user.service");
+const getUser = [
+    auth_mw_1.default,
+    (0, express_validator_1.param)("userId").isMongoId().withMessage("userId must be a valid id"),
+    validator_mw_1.validateResult,
+    async (req, res) => {
+        try {
+            (0, utils_1.throwIfUndefined)(req.user, "req.user");
+            const user = await user_model_1.UserModel.findById(req.data.userId).select("-password").lean(true);
+            return response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.OK,
+                message: "User fetched",
+                data: user,
+            });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
+                error: `${error}`,
+            });
+        }
+    },
+];
 const getAllUsers = [
     auth_mw_1.default,
     (0, express_validator_1.query)("page").optional().isNumeric().withMessage("Page must be a number"),
@@ -108,5 +132,6 @@ const getEntreprenuers = [
 exports.default = {
     getEntreprenuers,
     getAllUsers,
+    getUser,
 };
 //# sourceMappingURL=user.service.js.map

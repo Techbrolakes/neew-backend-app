@@ -14,6 +14,7 @@ const express_validator_2 = require("express-validator");
 const mongoose_1 = require("mongoose");
 const utils_1 = require("../utils");
 const notification_model_1 = require("../models/notification.model");
+const post_model_1 = require("../models/post.model");
 const debug = (0, debug_1.default)("project:post.service");
 const replyComment = [
     auth_mw_1.default,
@@ -24,7 +25,7 @@ const replyComment = [
     async (req, res) => {
         try {
             const user = (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const post = await post_core_1.default.getPostById(req.body.postId);
+            const post = await post_model_1.PostModel.findById(req.body.postId);
             if (!post) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
@@ -50,6 +51,7 @@ const replyComment = [
                     error: "Comment not found",
                 });
             }
+            // Create a notification for the reply
             if (commentFound) {
                 await notification_model_1.NotificationModel.create({
                     message: `New reply on your comment`,
@@ -58,7 +60,8 @@ const replyComment = [
                     userId: user.id,
                 });
             }
-            await post.save();
+            // Update the post document in the database
+            await post_model_1.PostModel.updateOne({ _id: req.body.postId }, { $set: { comments: post.comments } });
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.CREATED,

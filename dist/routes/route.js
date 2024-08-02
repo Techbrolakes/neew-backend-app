@@ -37,6 +37,7 @@ router.get("/conversation/list", conversation_service_1.default.list);
 router.get("/conversation/:conversationId", conversation_service_1.default.get);
 router.get("/posts/list", post_service_1.default.getPosts);
 router.get("/users", user_service_1.default.getAllUsers);
+router.get("/users/:userId", user_service_1.default.getUser);
 router.get("/user/entreprenuers", user_service_1.default.getEntreprenuers);
 router.get("/profile/me", profile_service_1.default.me);
 router.put("/profile/update", profile_service_1.default.update);

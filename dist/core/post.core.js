@@ -87,6 +87,8 @@ async function getAllPosts(req) {
     const [posts, total] = await Promise.all([
         post_model_1.PostModel.find()
             .sort({ createdAt: -1 })
+            .populate("creator", "firstName lastName photo persona")
+            .populate("mentions", "firstName lastName")
             .limit(perpage)
             .skip(page * perpage - perpage)
             .lean(),

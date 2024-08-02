@@ -131,6 +131,8 @@ async function getAllPosts(req: express.Request): Promise<IPostDocument[] | null
   const [posts, total] = await Promise.all([
     PostModel.find()
       .sort({ createdAt: -1 })
+      .populate("creator", "firstName lastName photo persona")
+      .populate("mentions", "firstName lastName")
       .limit(perpage)
       .skip(page * perpage - perpage)
       .lean(),
