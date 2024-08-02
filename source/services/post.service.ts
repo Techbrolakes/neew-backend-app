@@ -36,6 +36,12 @@ const replyComment = [
 
       let commentFound = false;
 
+      const comment: any = await PostModel.findOne({
+        "comments._id": req.body.commentId,
+      }).lean();
+
+      console.log(comment.comments);
+
       // Find the comment and add the reply
       post.comments.forEach((comment: any) => {
         if (comment._id.toString() === req.body.commentId) {
@@ -56,14 +62,16 @@ const replyComment = [
       }
 
       // Create a notification for the reply
-      if (commentFound) {
-        await NotificationModel.create({
-          message: `New reply on your comment`,
-          notificationType: "reply",
-          postId: post._id,
-          userId: user.id,
-        });
-      }
+      post.comments.forEach(async (comment: any) => {
+        if (comment._id.toString() === req.body.commentId) {
+          NotificationModel.create({
+            message: `New reply on your comment`,
+            notificationType: "reply",
+            postId: post._id,
+            userId: comment.user,
+          });
+        }
+      });
 
       // Update the post document in the database
       await PostModel.updateOne({ _id: req.body.postId }, { $set: { comments: post.comments } });
@@ -331,7 +339,7 @@ const get = [
 const create = [
   authMw,
   body("content").isString().withMessage("Content must be a string"),
-  body("image").isString().withMessage("Image must be a string"),
+  body("image").optional().isString().withMessage("Image must be a string"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {

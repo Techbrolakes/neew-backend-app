@@ -11,6 +11,7 @@ const response_handler_1 = __importDefault(require("../utils/response-handler"))
 const appDefaults_constant_1 = require("../constants/appDefaults.constant");
 const utils_1 = require("../utils");
 const express_validator_1 = require("express-validator");
+const follow_model_1 = require("../models/follow.model");
 const debug = (0, debug_1.default)("project:user.service");
 const getUser = [
     auth_mw_1.default,
@@ -20,11 +21,20 @@ const getUser = [
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
             const user = await user_model_1.UserModel.findById(req.data.userId).select("-password").lean(true);
+            //   get the user's followers
+            const followers = await follow_model_1.FollowModel.find({ userId: req.data.userId });
+            //   get the user's following
+            const following = await follow_model_1.FollowModel.find({ followerId: req.data.userId });
+            const result = {
+                user,
+                followersCount: followers.length,
+                followingCount: following.length,
+            };
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
                 message: "User fetched",
-                data: user,
+                data: result,
             });
         }
         catch (error) {
@@ -44,8 +54,23 @@ const getAllUsers = [
     async (req, res) => {
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const { page, perpage } = req.query;
-            const users = await user_model_1.UserModel.find()
+            const { page, perpage, locations, industries, interests } = req.query;
+            const filter = {};
+            if (locations) {
+                const locationsArray = locations.split(",").map((location) => location.trim());
+                // Create a regex pattern to match any of the locations
+                const locationPattern = locationsArray.map((location) => `(${location})`).join("|");
+                filter.location = { $regex: new RegExp(locationPattern, "i") }; // Case-insensitive search
+            }
+            if (industries) {
+                const industriesArray = industries.split(",").map((industry) => industry.trim());
+                filter.industry = { $in: industriesArray };
+            }
+            if (interests) {
+                const interestsArray = interests.split(",").map((interest) => interest.trim());
+                filter.interest = { $in: interestsArray };
+            }
+            const users = await user_model_1.UserModel.find(filter)
                 .select("-password")
                 .lean(true)
                 .sort({ createdAt: -1 })

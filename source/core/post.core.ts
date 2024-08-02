@@ -40,7 +40,7 @@ async function likePost({ postId, userId }: LikePost): Promise<IPostDocument | n
       message: `New like on your post`,
       notificationType: "like",
       postId: post._id,
-      userId,
+      userId: post.creator,
     });
   }
 
@@ -90,7 +90,7 @@ async function addComment({ postId, comment, userId, mentions }: AddComment): Pr
     await NotificationModel.create({
       message: `New comment on your post`,
       notificationType: "comment",
-      userId,
+      userId: post.creator,
     });
   }
 
@@ -101,7 +101,7 @@ async function addComment({ postId, comment, userId, mentions }: AddComment): Pr
       message: `New comment on your post`,
       notificationType: "comment",
       postId: post._id,
-      userId,
+      userId: post.creator,
     });
   }
 
@@ -120,6 +120,7 @@ async function getPostById(postId: Types.ObjectId): Promise<IPostDocument | null
     .populate("creator")
     .populate("comments.post", "content totalLikes numberOfComments")
     .populate("comments.user", "firstName lastName photo")
+    .populate("comments.replies.user", "firstName lastName photo")
     .lean();
 }
 

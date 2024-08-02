@@ -26,13 +26,6 @@ const list = [
             })
                 .populate("users", "firstName lastName email photo")
                 .sort({ updatedAt: -1 });
-            if (!conversations.length) {
-                return response_handler_1.default.sendErrorResponse({
-                    res,
-                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
-                    error: "No conversations found",
-                });
-            }
             // Fetch the last message for each conversation
             const conversationIds = conversations.map((conversation) => conversation._id);
             const messages = await message_model_1.MessageModel.aggregate([
@@ -97,13 +90,6 @@ const get = [
             const messages = await message_model_1.MessageModel.find({
                 conversationId: new mongoose_1.Types.ObjectId(req.params.conversationId),
             });
-            if (!conversation) {
-                return response_handler_1.default.sendErrorResponse({
-                    res,
-                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
-                    error: "conversation not found",
-                });
-            }
             const otherUser = conversation.users.filter((user) => user._id.toString() !== userId.toString());
             const data = {
                 ...conversation.toJSON(),

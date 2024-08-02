@@ -7,6 +7,7 @@ import ResponseHandler from "../utils/response-handler";
 import { HTTP_CODES } from "../constants/appDefaults.constant";
 import { paginationUtil, throwIfUndefined } from "../utils";
 import { param, query } from "express-validator";
+import { FollowModel } from "../models/follow.model";
 
 const debug = Debug("project:user.service");
 
@@ -20,11 +21,23 @@ const getUser = [
 
       const user = await UserModel.findById(req.data.userId).select("-password").lean(true);
 
+      //   get the user's followers
+      const followers = await FollowModel.find({ userId: req.data.userId });
+
+      //   get the user's following
+      const following = await FollowModel.find({ followerId: req.data.userId });
+
+      const result = {
+        user,
+        followersCount: followers.length,
+        followingCount: following.length,
+      };
+
       return ResponseHandler.sendSuccessResponse({
         res,
         code: HTTP_CODES.OK,
         message: "User fetched",
-        data: user,
+        data: result,
       });
     } catch (error: any) {
       return ResponseHandler.sendErrorResponse({
@@ -45,9 +58,32 @@ const getAllUsers = [
     try {
       throwIfUndefined(req.user, "req.user");
 
-      const { page, perpage } = req.query as any;
+      const { page, perpage, locations, industries, interests } = req.query as any;
 
-      const users = await UserModel.find()
+      const filter: any = {};
+
+      if (locations) {
+        const locationsArray = locations.split(",").map((location: string) => location.trim());
+
+        // Create a regex pattern to match any of the locations
+        const locationPattern = locationsArray.map((location: string) => `(${location})`).join("|");
+
+        filter.location = { $regex: new RegExp(locationPattern, "i") }; // Case-insensitive search
+      }
+
+      if (industries) {
+        const industriesArray = industries.split(",").map((industry: string) => industry.trim());
+
+        filter.industry = { $in: industriesArray };
+      }
+
+      if (interests) {
+        const interestsArray = interests.split(",").map((interest: string) => interest.trim());
+
+        filter.interest = { $in: interestsArray };
+      }
+
+      const users = await UserModel.find(filter)
         .select("-password")
         .lean(true)
         .sort({ createdAt: -1 })

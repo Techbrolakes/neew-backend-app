@@ -34,6 +34,10 @@ const replyComment = [
                 });
             }
             let commentFound = false;
+            const comment = await post_model_1.PostModel.findOne({
+                "comments._id": req.body.commentId,
+            }).lean();
+            console.log(comment.comments);
             // Find the comment and add the reply
             post.comments.forEach((comment) => {
                 if (comment._id.toString() === req.body.commentId) {
@@ -52,14 +56,16 @@ const replyComment = [
                 });
             }
             // Create a notification for the reply
-            if (commentFound) {
-                await notification_model_1.NotificationModel.create({
-                    message: `New reply on your comment`,
-                    notificationType: "reply",
-                    postId: post._id,
-                    userId: user.id,
-                });
-            }
+            post.comments.forEach(async (comment) => {
+                if (comment._id.toString() === req.body.commentId) {
+                    notification_model_1.NotificationModel.create({
+                        message: `New reply on your comment`,
+                        notificationType: "reply",
+                        postId: post._id,
+                        userId: comment.user,
+                    });
+                }
+            });
             // Update the post document in the database
             await post_model_1.PostModel.updateOne({ _id: req.body.postId }, { $set: { comments: post.comments } });
             return response_handler_1.default.sendSuccessResponse({
@@ -299,7 +305,7 @@ const get = [
 const create = [
     auth_mw_1.default,
     (0, express_validator_1.body)("content").isString().withMessage("Content must be a string"),
-    (0, express_validator_1.body)("image").isString().withMessage("Image must be a string"),
+    (0, express_validator_1.body)("image").optional().isString().withMessage("Image must be a string"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {

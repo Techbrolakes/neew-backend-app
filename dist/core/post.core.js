@@ -27,7 +27,7 @@ async function likePost({ postId, userId }) {
             message: `New like on your post`,
             notificationType: "like",
             postId: post._id,
-            userId,
+            userId: post.creator,
         });
     }
     return post.save();
@@ -54,7 +54,7 @@ async function addComment({ postId, comment, userId, mentions }) {
         await notification_model_1.NotificationModel.create({
             message: `New comment on your post`,
             notificationType: "comment",
-            userId,
+            userId: post.creator,
         });
     }
     post.comments.push(newComment);
@@ -63,7 +63,7 @@ async function addComment({ postId, comment, userId, mentions }) {
             message: `New comment on your post`,
             notificationType: "comment",
             postId: post._id,
-            userId,
+            userId: post.creator,
         });
     }
     // increment the number of comments
@@ -78,6 +78,7 @@ async function getPostById(postId) {
         .populate("creator")
         .populate("comments.post", "content totalLikes numberOfComments")
         .populate("comments.user", "firstName lastName photo")
+        .populate("comments.replies.user", "firstName lastName photo")
         .lean();
 }
 async function getAllPosts(req) {

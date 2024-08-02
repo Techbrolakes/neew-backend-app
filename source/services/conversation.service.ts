@@ -26,15 +26,6 @@ const list = [
         .populate("users", "firstName lastName email photo")
         .sort({ updatedAt: -1 });
 
-        
-      if (!conversations.length) {
-        return ResponseHandler.sendErrorResponse({
-          res,
-          code: HTTP_CODES.NOT_FOUND,
-          error: "No conversations found",
-        });
-      }
-
       // Fetch the last message for each conversation
       const conversationIds = conversations.map((conversation: any) => conversation._id);
       const messages = await MessageModel.aggregate([
@@ -108,14 +99,6 @@ const get = [
       const messages = await MessageModel.find({
         conversationId: new Types.ObjectId(req.params.conversationId),
       });
-
-      if (!conversation) {
-        return ResponseHandler.sendErrorResponse({
-          res,
-          code: HTTP_CODES.NOT_FOUND,
-          error: "conversation not found",
-        });
-      }
 
       const otherUser = conversation.users.filter((user: any) => user._id.toString() !== userId.toString());
 
