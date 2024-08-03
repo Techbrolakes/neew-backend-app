@@ -92,11 +92,18 @@ const register = [
         telephone: req.body.telephone,
       });
 
+      const token = await generateToken({
+        id: user._id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      });
+
       return ResponseHandler.sendSuccessResponse({
         res,
         code: HTTP_CODES.CREATED,
         message: "User created",
-        data: user,
+        data: { user, token },
       });
     } catch (error: any) {
       return ResponseHandler.sendErrorResponse({

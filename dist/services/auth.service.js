@@ -86,11 +86,17 @@ const register = [
                 password: req.body.password,
                 telephone: req.body.telephone,
             });
+            const token = await (0, utils_1.generateToken)({
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+            });
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.CREATED,
                 message: "User created",
-                data: user,
+                data: { user, token },
             });
         }
         catch (error) {
