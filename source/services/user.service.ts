@@ -53,12 +53,13 @@ const getAllUsers = [
   authMw,
   query("page").optional().isNumeric().withMessage("Page must be a number"),
   query("perpage").optional().isNumeric().withMessage("Perpage must be a number"),
+  query("search").optional().isString().withMessage("Search must be a string"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
       throwIfUndefined(req.user, "req.user");
 
-      const { page, perpage, locations, industries, interests } = req.query as any;
+      const { page, perpage, locations, industries, interests, search } = req.query as any;
 
       const filter: any = {};
 
@@ -81,6 +82,16 @@ const getAllUsers = [
         const interestsArray = interests.split(",").map((interest: string) => interest.trim());
 
         filter.interest = { $in: interestsArray };
+      }
+
+      if (search) {
+        const searchPattern = new RegExp(search, "i");
+
+        filter.$or = [
+          { firstName: searchPattern },
+          { lastName: searchPattern },
+          { email: searchPattern },
+        ];
       }
 
       const users = await UserModel.find(filter)

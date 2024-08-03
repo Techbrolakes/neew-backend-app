@@ -50,11 +50,12 @@ const getAllUsers = [
     auth_mw_1.default,
     (0, express_validator_1.query)("page").optional().isNumeric().withMessage("Page must be a number"),
     (0, express_validator_1.query)("perpage").optional().isNumeric().withMessage("Perpage must be a number"),
+    (0, express_validator_1.query)("search").optional().isString().withMessage("Search must be a string"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const { page, perpage, locations, industries, interests } = req.query;
+            const { page, perpage, locations, industries, interests, search } = req.query;
             const filter = {};
             if (locations) {
                 const locationsArray = locations.split(",").map((location) => location.trim());
@@ -69,6 +70,14 @@ const getAllUsers = [
             if (interests) {
                 const interestsArray = interests.split(",").map((interest) => interest.trim());
                 filter.interest = { $in: interestsArray };
+            }
+            if (search) {
+                const searchPattern = new RegExp(search, "i");
+                filter.$or = [
+                    { firstName: searchPattern },
+                    { lastName: searchPattern },
+                    { email: searchPattern },
+                ];
             }
             const users = await user_model_1.UserModel.find(filter)
                 .select("-password")

@@ -178,6 +178,7 @@ const edit = [
     (0, express_validator_1.body)("postId").isString().withMessage("PostId must be a string"),
     (0, express_validator_1.body)("content").isString().optional().withMessage("Content must be a string"),
     (0, express_validator_1.body)("image").isString().optional().withMessage("Image must be a string"),
+    (0, express_validator_1.body)("mentions").isArray().optional().withMessage("Mentions must be an array"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
@@ -194,6 +195,7 @@ const edit = [
                 postId: req.body.postId,
                 content: req.body.content,
                 image: req.body.image,
+                mentions: req.body.mentions,
             });
             return response_handler_1.default.sendSuccessResponse({
                 res,
@@ -306,6 +308,7 @@ const create = [
     auth_mw_1.default,
     (0, express_validator_1.body)("content").isString().withMessage("Content must be a string"),
     (0, express_validator_1.body)("image").optional().isString().withMessage("Image must be a string"),
+    (0, express_validator_1.body)("mentions").optional().isArray().withMessage("Mentions must be an array"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
@@ -314,7 +317,24 @@ const create = [
                 content: req.body.content,
                 creator: new mongoose_1.Types.ObjectId(user.id),
                 image: req.body.image,
+                mentions: req.body.mentions,
             });
+            // loop through mentions and create notification
+            if (newPost) {
+                if (req.body.mentions && req.body.mentions.length > 0) {
+                    const notifications = req.body.mentions.map(async (mention) => {
+                        const notification = await notification_model_1.NotificationModel.create({
+                            message: `${user.firstName} ${user.lastName} mentioned you in a post`,
+                            notificationType: "mentions",
+                            postId: newPost._id,
+                            read: "false",
+                            userId: mention,
+                        });
+                        return notification;
+                    });
+                    await Promise.all(notifications);
+                }
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.CREATED,

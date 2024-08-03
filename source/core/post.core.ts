@@ -57,13 +57,15 @@ type EditPost = {
   postId: Types.ObjectId;
   content: string;
   image: string;
+  mentions?: Types.ObjectId[] | any;
 };
 
-async function edit({ postId, content, image }: EditPost): Promise<IPostDocument | null> {
+async function edit({ postId, content, image, mentions }: EditPost): Promise<IPostDocument | null> {
   const post = await PostModel.findById(postId);
 
   post.content = content;
   post.image = image;
+  post.mentions = mentions;
 
   return post.save();
 }
@@ -184,13 +186,15 @@ type CreatePost = {
   content: string;
   creator: Types.ObjectId;
   image: string;
+  mentions?: Types.ObjectId[];
 };
 
-async function create({ content, creator, image }: CreatePost): Promise<IPostDocument> {
+async function create({ content, creator, image, mentions }: CreatePost): Promise<IPostDocument> {
   const post = {
     content,
     creator,
     image,
+    mentions,
   };
 
   return PostModel.create(post);

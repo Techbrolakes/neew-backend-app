@@ -196,6 +196,7 @@ const edit = [
   body("postId").isString().withMessage("PostId must be a string"),
   body("content").isString().optional().withMessage("Content must be a string"),
   body("image").isString().optional().withMessage("Image must be a string"),
+  body("mentions").isArray().optional().withMessage("Mentions must be an array"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
@@ -215,6 +216,7 @@ const edit = [
         postId: req.body.postId,
         content: req.body.content,
         image: req.body.image,
+        mentions: req.body.mentions,
       });
 
       return ResponseHandler.sendSuccessResponse({
@@ -340,6 +342,7 @@ const create = [
   authMw,
   body("content").isString().withMessage("Content must be a string"),
   body("image").optional().isString().withMessage("Image must be a string"),
+  body("mentions").optional().isArray().withMessage("Mentions must be an array"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
@@ -349,7 +352,27 @@ const create = [
         content: req.body.content,
         creator: new Types.ObjectId(user.id),
         image: req.body.image,
+        mentions: req.body.mentions,
       });
+
+      // loop through mentions and create notification
+      if (newPost) {
+        if (req.body.mentions && req.body.mentions.length > 0) {
+          const notifications = req.body.mentions.map(async (mention: string) => {
+            const notification = await NotificationModel.create({
+              message: `${user.firstName} ${user.lastName} mentioned you in a post`,
+              notificationType: "mentions",
+              postId: newPost._id,
+              read: "false",
+              userId: mention,
+            });
+
+            return notification;
+          });
+
+          await Promise.all(notifications);
+        }
+      }
 
       return ResponseHandler.sendSuccessResponse({
         res,

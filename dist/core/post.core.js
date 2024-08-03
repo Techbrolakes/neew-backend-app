@@ -36,10 +36,11 @@ async function likePost({ postId, userId }) {
 async function deletePost(postId) {
     return post_model_1.PostModel.findByIdAndDelete({ _id: postId });
 }
-async function edit({ postId, content, image }) {
+async function edit({ postId, content, image, mentions }) {
     const post = await post_model_1.PostModel.findById(postId);
     post.content = content;
     post.image = image;
+    post.mentions = mentions;
     return post.save();
 }
 async function addComment({ postId, comment, userId, mentions }) {
@@ -126,11 +127,12 @@ async function find(req, userId) {
         pagination,
     };
 }
-async function create({ content, creator, image }) {
+async function create({ content, creator, image, mentions }) {
     const post = {
         content,
         creator,
         image,
+        mentions,
     };
     return post_model_1.PostModel.create(post);
 }
