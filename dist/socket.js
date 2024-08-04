@@ -6,7 +6,7 @@ const conversation_model_1 = require("./models/conversation.model");
 const socket = (server) => {
     const io = new socket_io_1.Server(server, {
         cors: {
-            origin: "*", // Adjust the origin to match your frontend... or use "*" to allow all origins
+            origin: "*", // Allow all origins
             methods: ["GET", "POST"],
         },
     });
@@ -39,9 +39,6 @@ const socket = (server) => {
         socket.on("error", (error) => {
             console.error("Socket error:", error);
         });
-    });
-    server.listen(9002, () => {
-        console.log("Socket.IO start listening to port: 9002");
     });
     return io;
 };

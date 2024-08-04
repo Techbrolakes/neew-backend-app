@@ -8,6 +8,10 @@ const express_1 = __importDefault(require("express"));
 const morgan_1 = __importDefault(require("morgan"));
 const route_1 = __importDefault(require("../routes/route"));
 const testRoute_1 = __importDefault(require("../routes/testRoute"));
+const socket_1 = __importDefault(require("../socket"));
+const http_1 = __importDefault(require("http"));
+const app = (0, express_1.default)();
+const server = http_1.default.createServer(app);
 function middlewareNotFound(req, res, next) {
     const err = new Error("Not Found: " + req.url);
     err.status = 404;
@@ -39,10 +43,12 @@ function setupExpress(app) {
     }
     app.use(middlewareNotFound);
     app.use(middlewareError);
-    app.listen(port, () => {
-        console.log(`Express start listening to port: ${port.toString()}`);
+    // Initialize Socket.IO with the HTTP server
+    (0, socket_1.default)(server);
+    server.listen(port, () => {
+        console.log(`Server listening on port: ${port}`);
     });
-    console.log("finish setting up Express");
+    console.log("Finish setting up Express");
     return app;
 }
 function normalizePort(val) {

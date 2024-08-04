@@ -1,9 +1,13 @@
 import cors from "cors";
 import express, { Express } from "express";
 import morgan from "morgan";
-
 import route from "../routes/route";
 import testRoute from "../routes/testRoute";
+import socket from "../socket";
+import http from "http";
+
+const app = express();
+const server = http.createServer(app);
 
 function middlewareNotFound(req: express.Request, res: express.Response, next: express.NextFunction) {
   const err = new Error("Not Found: " + req.url) as any;
@@ -49,11 +53,14 @@ function setupExpress(app: Express) {
   app.use(middlewareNotFound);
   app.use(middlewareError);
 
-  app.listen(port, () => {
-    console.log(`Express start listening to port: ${port.toString()}`);
+  // Initialize Socket.IO with the HTTP server
+  socket(server);
+
+  server.listen(port, () => {
+    console.log(`Server listening on port: ${port}`);
   });
 
-  console.log("finish setting up Express");
+  console.log("Finish setting up Express");
   return app;
 }
 

@@ -5,7 +5,7 @@ import { ConversationModel } from "./models/conversation.model";
 const socket = (server: any) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: "*", // Adjust the origin to match your frontend... or use "*" to allow all origins
+      origin: "*", // Allow all origins
       methods: ["GET", "POST"],
     },
   });
@@ -49,10 +49,6 @@ const socket = (server: any) => {
     socket.on("error", (error) => {
       console.error("Socket error:", error);
     });
-  });
-
-  server.listen(9002, () => {
-    console.log("Socket.IO start listening to port: 9002");
   });
 
   return io;
