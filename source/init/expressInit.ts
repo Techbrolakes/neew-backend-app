@@ -1,13 +1,9 @@
 import cors from "cors";
 import express, { Express } from "express";
 import morgan from "morgan";
+
 import route from "../routes/route";
 import testRoute from "../routes/testRoute";
-import socket from "../socket";
-import http from "http";
-
-const app = express();
-const server = http.createServer(app);
 
 function middlewareNotFound(req: express.Request, res: express.Response, next: express.NextFunction) {
   const err = new Error("Not Found: " + req.url) as any;
@@ -42,8 +38,6 @@ function setupExpress(app: Express) {
 
   app.use(cors());
 
-  const port = normalizePort(process.env.PORT || "9001");
-
   app.use("/api", route);
 
   if (process.env.NODE_ENV === "test") {
@@ -53,31 +47,7 @@ function setupExpress(app: Express) {
   app.use(middlewareNotFound);
   app.use(middlewareError);
 
-  // Initialize Socket.IO with the HTTP server
-  socket(server);
-
-  server.listen(port, () => {
-    console.log(`Server listening on port: ${port}`);
-  });
-
   console.log("Finish setting up Express");
-  return app;
-}
-
-function normalizePort(val: string) {
-  const port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
 }
 
 export default {

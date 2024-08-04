@@ -1,8 +1,9 @@
 import { Server as SocketIOServer } from "socket.io";
 import { MessageModel } from "./models/message.model";
 import { ConversationModel } from "./models/conversation.model";
+import http from "http";
 
-const socket = (server: any) => {
+const socket = (server: http.Server) => {
   const io = new SocketIOServer(server, {
     cors: {
       origin: "*", // Allow all origins
