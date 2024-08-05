@@ -56,7 +56,7 @@ const UserSchema = new mongoose.Schema(
     industry: { required: false, type: [String] },
     interest: {
       default: "general_interest",
-      enum: ["investor", "entrepreneur", "partner", "general_interest", "champion"],
+      enum: ["investor", "entrepreneur", "partner", "general_interest", "champion", "business_partner"],
       type: [String],
     },
     lastName: { required: true, type: String },

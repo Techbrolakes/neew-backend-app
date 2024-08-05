@@ -2,6 +2,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { MessageModel } from "./models/message.model";
 import { ConversationModel } from "./models/conversation.model";
 import http from "http";
+import { UserModel } from "./models/user.model";
 
 const socket = (server: http.Server) => {
   const io = new SocketIOServer(server, {
@@ -11,8 +12,22 @@ const socket = (server: http.Server) => {
     },
   });
 
+  // To track connected users
+  const onlineUsers = new Map<string, string>();
+
   io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
+
+    // online statuse
+    socket.on("online", async (userId: string) => {
+      try {
+        onlineUsers.set(userId, socket.id); // Track the user's socket ID
+        await UserModel.findByIdAndUpdate(userId, { online: true });
+      } catch (error) {
+        console.error("Error updating user online status:", error);
+        socket.emit("error", { message: "Failed to update online status" });
+      }
+    });
 
     // Join a conversation room
     socket.on("joinConversation", (conversationId: string) => {
@@ -94,8 +109,20 @@ const socket = (server: http.Server) => {
     });
 
     // Handle socket disconnection
-    socket.on("disconnect", () => {
+    socket.on("disconnect", async () => {
       console.log("User disconnected:", socket.id);
+
+      // Find the user associated with the disconnected socket ID
+      const userId = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
+
+      if (userId) {
+        try {
+          await UserModel.findByIdAndUpdate(userId, { online: false });
+          onlineUsers.delete(userId); // Remove from the tracked online users
+        } catch (error) {
+          console.error("Error updating user offline status:", error);
+        }
+      }
     });
   });
 

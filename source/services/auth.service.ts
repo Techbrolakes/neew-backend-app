@@ -170,8 +170,8 @@ const checkEmail = [
       if (user) {
         return ResponseHandler.sendErrorResponse({
           res,
-          code: HTTP_CODES.NOT_FOUND,
-          error: "Email already exist",
+          code: HTTP_CODES.CONFLICT,
+          error: "This email is already taken",
         });
       }
 

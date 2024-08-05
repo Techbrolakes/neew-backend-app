@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const socket_io_1 = require("socket.io");
 const message_model_1 = require("./models/message.model");
 const conversation_model_1 = require("./models/conversation.model");
+const user_model_1 = require("./models/user.model");
 const socket = (server) => {
     const io = new socket_io_1.Server(server, {
         cors: {
@@ -10,8 +11,21 @@ const socket = (server) => {
             methods: ["GET", "POST"],
         },
     });
+    // To track connected users
+    const onlineUsers = new Map();
     io.on("connection", (socket) => {
         console.log("A user connected:", socket.id);
+        // online statuse
+        socket.on("online", async (userId) => {
+            try {
+                onlineUsers.set(userId, socket.id); // Track the user's socket ID
+                await user_model_1.UserModel.findByIdAndUpdate(userId, { online: true });
+            }
+            catch (error) {
+                console.error("Error updating user online status:", error);
+                socket.emit("error", { message: "Failed to update online status" });
+            }
+        });
         // Join a conversation room
         socket.on("joinConversation", (conversationId) => {
             socket.join(conversationId);
@@ -75,8 +89,19 @@ const socket = (server) => {
             socket.emit("error", { message: "Socket encountered an error" });
         });
         // Handle socket disconnection
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
             console.log("User disconnected:", socket.id);
+            // Find the user associated with the disconnected socket ID
+            const userId = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
+            if (userId) {
+                try {
+                    await user_model_1.UserModel.findByIdAndUpdate(userId, { online: false });
+                    onlineUsers.delete(userId); // Remove from the tracked online users
+                }
+                catch (error) {
+                    console.error("Error updating user offline status:", error);
+                }
+            }
         });
     });
     return io;

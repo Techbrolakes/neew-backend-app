@@ -157,8 +157,8 @@ const checkEmail = [
             if (user) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
-                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
-                    error: "Email already exist",
+                    code: appDefaults_constant_1.HTTP_CODES.CONFLICT,
+                    error: "This email is already taken",
                 });
             }
             return response_handler_1.default.sendSuccessResponse({

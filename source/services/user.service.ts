@@ -87,11 +87,7 @@ const getAllUsers = [
       if (search) {
         const searchPattern = new RegExp(search, "i");
 
-        filter.$or = [
-          { firstName: searchPattern },
-          { lastName: searchPattern },
-          { email: searchPattern },
-        ];
+        filter.$or = [{ firstName: searchPattern }, { lastName: searchPattern }, { email: searchPattern }];
       }
 
       const users = await UserModel.find(filter)
@@ -191,8 +187,43 @@ const getEntreprenuers = [
   },
 ];
 
+// const convert = [
+//   async (req: express.Request, res: express.Response) => {
+//     try {
+//       // Update `interest` field
+//       await UserModel.updateMany(
+//         { interest: { $type: "string" } }, // Find documents where `interest` is a string
+//         [
+//           { $set: { interest: [{ $arrayElemAt: [{ $split: ["$interest", ","] }, 0] }] } }, // Convert string to array
+//         ],
+//       );
+
+//       // Update `industry` field
+//       await UserModel.updateMany(
+//         { industry: { $type: "string" } }, // Find documents where `industry` is a string
+//         [
+//           { $set: { industry: [{ $arrayElemAt: [{ $split: ["$industry", ","] }, 0] }] } }, // Convert string to array
+//         ],
+//       );
+
+//       return ResponseHandler.sendSuccessResponse({
+//         res,
+//         code: HTTP_CODES.OK,
+//         message: "Conversion successful",
+//       });
+//     } catch (error: any) {
+//       return ResponseHandler.sendErrorResponse({
+//         res,
+//         code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+//         error: `${error}`,
+//       });
+//     }
+//   },
+// ];
+
 export default {
   getEntreprenuers,
   getAllUsers,
   getUser,
+  // convert,
 };
