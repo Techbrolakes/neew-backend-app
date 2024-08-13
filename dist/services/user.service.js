@@ -12,6 +12,7 @@ const appDefaults_constant_1 = require("../constants/appDefaults.constant");
 const utils_1 = require("../utils");
 const express_validator_1 = require("express-validator");
 const follow_model_1 = require("../models/follow.model");
+const constants_1 = require("../constants");
 const debug = (0, debug_1.default)("project:user.service");
 const getUser = [
     auth_mw_1.default,
@@ -55,13 +56,31 @@ const getAllUsers = [
     async (req, res) => {
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const { page, perpage, locations, industries, interests, search } = req.query;
+            const { page = 1, perpage = 10, locations, industries, interests, search } = req.query;
             const filter = {};
             if (locations) {
                 const locationsArray = locations.split(",").map((location) => location.trim());
+                const countryFilter = [];
+                const continentFilter = [];
+                locationsArray.forEach((loc) => {
+                    if (Object.keys(constants_1.continentToCountries).includes(loc)) {
+                        continentFilter.push(loc);
+                    }
+                    else {
+                        countryFilter.push(loc);
+                    }
+                });
                 // Create a regex pattern to match any of the locations
-                const locationPattern = locationsArray.map((location) => `(${location})`).join("|");
-                filter.location = { $regex: new RegExp(locationPattern, "i") }; // Case-insensitive search
+                if (continentFilter.length > 0) {
+                    continentFilter.forEach((continent) => {
+                        if (constants_1.continentToCountries[continent]) {
+                            countryFilter.push(...constants_1.continentToCountries[continent]);
+                        }
+                    });
+                }
+                if (countryFilter.length > 0) {
+                    filter.location = { $regex: new RegExp(countryFilter.join("|"), "i") }; // Case-insensitive search
+                }
             }
             if (industries) {
                 const industriesArray = industries.split(",").map((industry) => industry.trim());
@@ -80,7 +99,7 @@ const getAllUsers = [
                 .lean(true)
                 .sort({ createdAt: -1 })
                 .limit(perpage)
-                .skip(page * perpage - perpage);
+                .skip((page - 1) * perpage);
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,

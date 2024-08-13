@@ -8,6 +8,7 @@ import { HTTP_CODES } from "../constants/appDefaults.constant";
 import { paginationUtil, throwIfUndefined } from "../utils";
 import { param, query } from "express-validator";
 import { FollowModel } from "../models/follow.model";
+import { continentToCountries } from "../constants";
 
 const debug = Debug("project:user.service");
 
@@ -59,34 +60,49 @@ const getAllUsers = [
     try {
       throwIfUndefined(req.user, "req.user");
 
-      const { page, perpage, locations, industries, interests, search } = req.query as any;
+      const { page = 1, perpage = 10, locations, industries, interests, search } = req.query as any;
 
       const filter: any = {};
 
       if (locations) {
         const locationsArray = locations.split(",").map((location: string) => location.trim());
+        const countryFilter: string[] = [];
+        const continentFilter: string[] = [];
+
+        locationsArray.forEach((loc: string) => {
+          if (Object.keys(continentToCountries).includes(loc)) {
+            continentFilter.push(loc);
+          } else {
+            countryFilter.push(loc);
+          }
+        });
 
         // Create a regex pattern to match any of the locations
-        const locationPattern = locationsArray.map((location: string) => `(${location})`).join("|");
+        if (continentFilter.length > 0) {
+          continentFilter.forEach((continent: string) => {
+            if (continentToCountries[continent]) {
+              countryFilter.push(...continentToCountries[continent]);
+            }
+          });
+        }
 
-        filter.location = { $regex: new RegExp(locationPattern, "i") }; // Case-insensitive search
+        if (countryFilter.length > 0) {
+          filter.location = { $regex: new RegExp(countryFilter.join("|"), "i") }; // Case-insensitive search
+        }
       }
 
       if (industries) {
         const industriesArray = industries.split(",").map((industry: string) => industry.trim());
-
         filter.industry = { $in: industriesArray };
       }
 
       if (interests) {
         const interestsArray = interests.split(",").map((interest: string) => interest.trim());
-
         filter.interest = { $in: interestsArray };
       }
 
       if (search) {
         const searchPattern = new RegExp(search, "i");
-
         filter.$or = [{ firstName: searchPattern }, { lastName: searchPattern }, { email: searchPattern }];
       }
 
@@ -95,7 +111,7 @@ const getAllUsers = [
         .lean(true)
         .sort({ createdAt: -1 })
         .limit(perpage)
-        .skip(page * perpage - perpage);
+        .skip((page - 1) * perpage);
 
       return ResponseHandler.sendSuccessResponse({
         res,
