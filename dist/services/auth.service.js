@@ -85,12 +85,15 @@ const register = [
                 location: req.body.location,
                 password: req.body.password,
                 telephone: req.body.telephone,
+                provider: user_model_1.AuthProvider.local,
+                provider_id: req.body.email,
             });
             const token = await (0, utils_1.generateToken)({
                 id: user._id,
                 email: user.email,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                userId: user._id,
             });
             return response_handler_1.default.sendSuccessResponse({
                 res,

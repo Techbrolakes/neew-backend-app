@@ -7,7 +7,7 @@ import ResponseHandler from "../utils/response-handler";
 import { HTTP_CODES } from "../constants/appDefaults.constant";
 import bcrypt from "bcrypt";
 import { generateToken } from "../utils";
-import { UserModel } from "../models/user.model";
+import { AuthProvider, UserModel } from "../models/user.model";
 
 const debug = Debug("project:user.service");
 
@@ -90,6 +90,8 @@ const register = [
         location: req.body.location,
         password: req.body.password,
         telephone: req.body.telephone,
+        provider: AuthProvider.local,
+        provider_id: req.body.email,
       });
 
       const token = await generateToken({
@@ -97,6 +99,7 @@ const register = [
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        userId: user._id,
       });
 
       return ResponseHandler.sendSuccessResponse({

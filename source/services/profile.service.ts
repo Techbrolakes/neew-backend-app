@@ -80,6 +80,8 @@ const me = [
     try {
       const user = throwIfUndefined(req.user, "req.user");
 
+      console.log('user', user)
+
       const currentUser = await UserModel.findById(user.id).select("-password").lean(true);
 
       return ResponseHandler.sendSuccessResponse({

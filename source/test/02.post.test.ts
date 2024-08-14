@@ -56,7 +56,7 @@ describe("Post Test", async () => {
 
   it("List Ola Posts", async () => {
     const res = await request(app)
-      .get("/api/post/user-posts") //
+      .get(`/api/posts/user-posts/${testData.userOla.doc._id}`) //
       .set("x-auth-token", testData.userOla.token);
 
     if (res.error) console.error(res.error);
@@ -67,7 +67,7 @@ describe("Post Test", async () => {
 
   it("List David Posts", async () => {
     const res = await request(app)
-      .get("/api/post/user-posts") //
+      .get(`/api/posts/user-posts/${testData.userDavid.doc._id}`) //
       .set("x-auth-token", testData.userDavid.token);
 
     if (res.error) console.error(res.error);
@@ -78,7 +78,7 @@ describe("Post Test", async () => {
 
   it("List All Posts", async () => {
     const res = await request(app)
-      .get("/api/pos/all-posts") //
+      .get("/api/posts/list") //
       .set("x-auth-token", testData.userOla.token);
 
     if (res.error) console.error(res.error);

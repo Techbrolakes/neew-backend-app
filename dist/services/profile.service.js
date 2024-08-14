@@ -77,6 +77,7 @@ const me = [
     async (req, res) => {
         try {
             const user = (0, utils_1.throwIfUndefined)(req.user, "req.user");
+            console.log('user', user);
             const currentUser = await user_model_1.UserModel.findById(user.id).select("-password").lean(true);
             return response_handler_1.default.sendSuccessResponse({
                 res,

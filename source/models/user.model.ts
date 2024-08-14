@@ -1,5 +1,9 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 
+export enum AuthProvider {
+  local = "local",
+  google = "google",
+}
 export interface IUser {
   email: string;
   firstName: string;
@@ -34,6 +38,8 @@ export interface IUser {
   companyLogo?: string;
   persona?: string;
   online?: boolean; // Add this field
+  provider: AuthProvider;
+  provider_id: string;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -79,6 +85,15 @@ const UserSchema = new mongoose.Schema(
     traction: { required: false, type: String },
     usp: { required: false, type: String },
     website: { required: false, type: String }, // Add this field
+    provider: {
+      type: String,
+      enum: Object.values(AuthProvider),
+      required: true,
+    },
+    provider_id: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true },
 );

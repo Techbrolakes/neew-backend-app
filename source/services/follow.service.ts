@@ -74,8 +74,7 @@ const getFollowers = [
   },
 ];
 
-const
-  followUser = [
+const followUser = [
   authMw,
   body("followee").isString().withMessage("Followee is required"),
   validateResult,

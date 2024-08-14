@@ -20,7 +20,7 @@ async function generateToken(data) {
     return new Promise((resolve, _reject) => {
         const signOptions = {};
         signOptions.expiresIn = "365d";
-        jsonwebtoken_1.default.sign(data, "neew", signOptions, (err, token) => {
+        jsonwebtoken_1.default.sign(data, "neew.@#KSJ1a@js", signOptions, (err, token) => {
             if (err) {
                 (0, debug_1.default)(err.message);
             }

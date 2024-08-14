@@ -34,7 +34,7 @@ async function getAll(req: express.Request): Promise<IUserDocument[] | null | an
   const page = Number(query.page) || 1;
   const dateFrom = query.dateFrom || "Jan 1 2021";
   const dateTo = query.dateTo || `${Date()}`;
-  const period = "all" || String(query.period); // Set the period for filtering
+  const period = String(query.period); // Set the period for filtering
 
   const timeFilter = await timeUtil({ period, dateFrom, dateTo });
 
@@ -100,6 +100,8 @@ async function create({
   companyLogo,
   ebitda,
   usp,
+  provider,
+  provider_id,
 }: IUser): Promise<IUserDocument> {
   const data = {
     email: email.trim().toLowerCase(),
@@ -133,6 +135,8 @@ async function create({
     companyLogo,
     ebitda,
     usp,
+    provider,
+    provider_id,
   };
 
   // If password is provided, generate salt and hash it

@@ -3,8 +3,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserModel = void 0;
+exports.UserModel = exports.AuthProvider = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
+var AuthProvider;
+(function (AuthProvider) {
+    AuthProvider["local"] = "local";
+    AuthProvider["google"] = "google";
+})(AuthProvider || (exports.AuthProvider = AuthProvider = {}));
 const UserSchema = new mongoose_1.default.Schema({
     communityImpact: { required: false, type: String },
     companyLogo: { required: false, type: String },
@@ -47,6 +52,15 @@ const UserSchema = new mongoose_1.default.Schema({
     traction: { required: false, type: String },
     usp: { required: false, type: String },
     website: { required: false, type: String }, // Add this field
+    provider: {
+        type: String,
+        enum: Object.values(AuthProvider),
+        required: true,
+    },
+    provider_id: {
+        type: String,
+        required: true,
+    },
 }, { timestamps: true });
 // A model type extending the mongoose Model interface
 exports.UserModel = mongoose_1.default.model("User", UserSchema);

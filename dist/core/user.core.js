@@ -30,7 +30,7 @@ async function getAll(req) {
     const page = Number(query.page) || 1;
     const dateFrom = query.dateFrom || "Jan 1 2021";
     const dateTo = query.dateTo || `${Date()}`;
-    const period = "all" || String(query.period); // Set the period for filtering
+    const period = String(query.period); // Set the period for filtering
     const timeFilter = await (0, utils_1.timeUtil)({ period, dateFrom, dateTo });
     const searching = (0, utils_1.searchUtil)({
         search: search,
@@ -57,7 +57,7 @@ async function getAll(req) {
         },
     });
 }
-async function create({ email, firstName, interest, lastName, location, password, telephone, website, communityImpact, foundingYear, industry, locationOfRegistration, networkWants, operatingAddress, photo, revenue, sdgImpact, traction, productMaturity, growthTrend, exitFounder, exitStrategy, exitTimeFrame, exitMethod, forecastedEbitda, founderValuation, founderValuationLogic, companyName, companyLogo, ebitda, usp, }) {
+async function create({ email, firstName, interest, lastName, location, password, telephone, website, communityImpact, foundingYear, industry, locationOfRegistration, networkWants, operatingAddress, photo, revenue, sdgImpact, traction, productMaturity, growthTrend, exitFounder, exitStrategy, exitTimeFrame, exitMethod, forecastedEbitda, founderValuation, founderValuationLogic, companyName, companyLogo, ebitda, usp, provider, provider_id, }) {
     const data = {
         email: email.trim().toLowerCase(),
         firstName: firstName.trim().toLocaleLowerCase(),
@@ -90,6 +90,8 @@ async function create({ email, firstName, interest, lastName, location, password
         companyLogo,
         ebitda,
         usp,
+        provider,
+        provider_id,
     };
     // If password is provided, generate salt and hash it
     if (password) {

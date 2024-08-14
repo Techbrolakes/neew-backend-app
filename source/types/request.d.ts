@@ -3,9 +3,9 @@ declare namespace Express {
     data: any;
     user: {
       id: string;
-      email: string;
-      firstName: string;
-      lastName: string;
+      email?: string;
+      firstName?: string;
+      lastName?: string;
     };
   }
 }

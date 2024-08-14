@@ -17,7 +17,7 @@ export async function generateToken(data: any) {
     const signOptions: any = {};
     signOptions.expiresIn = "365d";
 
-    jwt.sign(data, "neew", signOptions, (err: any, token: any) => {
+    jwt.sign(data, "neew.@#KSJ1a@js", signOptions, (err: any, token: any) => {
       if (err) {
         debug(err.message);
       }
