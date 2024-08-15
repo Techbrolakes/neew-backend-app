@@ -46,8 +46,8 @@ function decodeTokenLocal(token) {
     });
 }
 async function decodeTokenGoogle(token) {
-    const secretKey = "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";
-    const clientId = "354745730971-7m8stefuln9oa2ldlqscv2s9jrc766rf.apps.googleusercontent.com";
+    const secretKey = "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";
+    const clientId = "354745730971-gvnhchqq4hm1p66no0ti40mnj5h06c75.apps.googleusercontent.com";
     const client = new google_auth_library_1.OAuth2Client(clientId, secretKey);
     const ticket = await client.verifyIdToken({
         idToken: token,

@@ -61,8 +61,8 @@ function decodeTokenLocal(token: string) {
 }
 
 async function decodeTokenGoogle(token: string): Promise<TokenPayload> {
-  const secretKey = "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";
-  const clientId = "354745730971-7m8stefuln9oa2ldlqscv2s9jrc766rf.apps.googleusercontent.com";
+  const secretKey = "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";
+  const clientId = "354745730971-gvnhchqq4hm1p66no0ti40mnj5h06c75.apps.googleusercontent.com";
 
   const client = new OAuth2Client(clientId, secretKey);
 

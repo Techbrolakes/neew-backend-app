@@ -4,6 +4,7 @@ const socket_io_1 = require("socket.io");
 const message_model_1 = require("./models/message.model");
 const conversation_model_1 = require("./models/conversation.model");
 const user_model_1 = require("./models/user.model");
+const mongoose_1 = require("mongoose");
 const socket = (server) => {
     const io = new socket_io_1.Server(server, {
         cors: {
@@ -15,7 +16,7 @@ const socket = (server) => {
     const onlineUsers = new Map();
     io.on("connection", (socket) => {
         console.log("A user connected:", socket.id);
-        // online statuse
+        // Online status
         socket.on("online", async (userId) => {
             try {
                 onlineUsers.set(userId, socket.id); // Track the user's socket ID
@@ -31,11 +32,77 @@ const socket = (server) => {
             socket.join(conversationId);
             console.log(`Socket ${socket.id} joined conversation ${conversationId}`);
         });
+        // Get all conversations
+        socket.on("getAllConversations", async (userId) => {
+            try {
+                const conversations = await conversation_model_1.ConversationModel.find({ users: userId })
+                    .populate("users", "firstName lastName email photo")
+                    .sort({ updatedAt: -1 })
+                    .lean();
+                const conversationIds = conversations.map((conv) => conv._id);
+                const messages = await message_model_1.MessageModel.aggregate([
+                    { $match: { conversationId: { $in: conversationIds } } },
+                    { $sort: { createdAt: -1 } },
+                    {
+                        $group: {
+                            _id: "$conversationId",
+                            lastMessage: { $first: "$$ROOT" },
+                        },
+                    },
+                ]);
+                const lastMessagesMap = messages.reduce((acc, msg) => {
+                    acc[msg._id.toString()] = msg.lastMessage;
+                    return acc;
+                }, {});
+                const filteredConversations = conversations.map((conv) => {
+                    const otherUser = conv.users.find((user) => user._id.toString() !== userId.toString());
+                    return {
+                        ...conv,
+                        lastMessage: lastMessagesMap[conv._id.toString()] || null,
+                        otherUser,
+                    };
+                });
+                const unreadConversationsCount = filteredConversations.filter((conv) => conv.hasUnread).length;
+                socket.emit("allConversations", {
+                    conversations: filteredConversations,
+                    unreadConversationsCount,
+                });
+            }
+            catch (error) {
+                console.error("Error fetching conversations:", error);
+                socket.emit("error", { message: "Failed to fetch conversations" });
+            }
+        });
+        // Get conversation by ID
+        socket.on("getConversation", async (userId, conversationId) => {
+            try {
+                const conversation = await conversation_model_1.ConversationModel.findOne({
+                    _id: new mongoose_1.Types.ObjectId(conversationId),
+                }).populate("users", "firstName lastName email photo persona");
+                if (!conversation) {
+                    socket.emit("error", { message: "Conversation not found" });
+                    return;
+                }
+                const messages = await message_model_1.MessageModel.find({
+                    conversationId: new mongoose_1.Types.ObjectId(conversationId),
+                });
+                const otherUser = conversation.users.find((user) => user._id.toString() !== userId.toString());
+                const data = {
+                    ...conversation.toJSON(),
+                    messages,
+                    otherUser,
+                };
+                socket.emit("conversation", data);
+            }
+            catch (error) {
+                console.error("Error fetching conversation:", error);
+                socket.emit("error", { message: "Failed to fetch conversation" });
+            }
+        });
         // Send a message
         socket.on("sendMessage", async (messageData) => {
             const { text, image, conversationId, senderId } = messageData;
             try {
-                // Create and save the message
                 const message = new message_model_1.MessageModel({
                     text,
                     image,
@@ -51,6 +118,11 @@ const socket = (server) => {
                     $inc: { unreadCount: 1 },
                     $push: { messages: message._id },
                 }, { new: true });
+                // Notify all clients in the conversation about the updated unread count
+                io.to(conversationId).emit("conversationUpdated", {
+                    conversationId,
+                    unreadCount: (await conversation_model_1.ConversationModel.findById(conversationId)).unreadCount,
+                });
             }
             catch (error) {
                 console.error("Error sending message:", error);
@@ -71,11 +143,9 @@ const socket = (server) => {
         // Mark messages as seen
         socket.on("markMessagesSeen", async (conversationId) => {
             try {
-                // Update messages status to seen
                 await message_model_1.MessageModel.updateMany({ conversationId, status: "delivered" }, { $set: { status: "seen" } });
-                // Update conversation unread count and seen status
                 const conversation = await conversation_model_1.ConversationModel.findByIdAndUpdate(conversationId, { unreadCount: 0, hasUnread: false }, { new: true }).lean();
-                // Emit the updated conversation to all clients in the conversation
+                // Notify all clients in the conversation about the updated conversation
                 io.to(conversationId).emit("conversationUpdated", conversation);
             }
             catch (error) {
@@ -91,7 +161,6 @@ const socket = (server) => {
         // Handle socket disconnection
         socket.on("disconnect", async () => {
             console.log("User disconnected:", socket.id);
-            // Find the user associated with the disconnected socket ID
             const userId = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
             if (userId) {
                 try {
