@@ -13,6 +13,34 @@ import { ConversationModel } from "../models/conversation.model";
 
 const debug = Debug("project:messageInvite.service");
 
+const senderlist = [
+  authMw,
+  validateResult,
+  async (req: express.Request, res: express.Response) => {
+    try {
+      const user = throwIfUndefined(req.user, "req.user");
+
+      const messageInvites = await MessageInviteModel.find({
+        inviteStatus: "pending",
+        sender: new Types.ObjectId(user.id),
+      }).populate("receiver", "firstName lastName email");
+
+      return ResponseHandler.sendSuccessResponse({
+        res,
+        code: HTTP_CODES.OK,
+        message: "Message Invites fetched",
+        data: messageInvites,
+      });
+    } catch (error: any) {
+      return ResponseHandler.sendErrorResponse({
+        res,
+        code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+        error: `${error}`,
+      });
+    }
+  },
+];
+
 const list = [
   authMw,
   validateResult,
@@ -149,4 +177,5 @@ export default {
   create,
   list,
   put,
+  senderlist,
 };

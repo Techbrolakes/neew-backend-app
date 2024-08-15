@@ -29,6 +29,7 @@ router.post("/post/reply-comment", post_service_1.default.replyComment);
 router.delete("/post/delete/:postId", post_service_1.default.deletePost);
 router.get("/post/get-likes-users/:postId", post_service_1.default.getLikesUsers);
 router.get("/message-invite/list", messageInvite_service_1.default.list);
+router.get("/message-invite/senderlist", messageInvite_service_1.default.senderlist);
 router.put("/message-invite/status", messageInvite_service_1.default.put);
 router.post("/message-invite/create", messageInvite_service_1.default.create);
 router.get("/message/seen", message_service_1.default.seen);

@@ -15,6 +15,32 @@ const utils_1 = require("../utils");
 const mongoose_1 = require("mongoose");
 const conversation_model_1 = require("../models/conversation.model");
 const debug = (0, debug_1.default)("project:messageInvite.service");
+const senderlist = [
+    auth_mw_1.default,
+    validator_mw_1.validateResult,
+    async (req, res) => {
+        try {
+            const user = (0, utils_1.throwIfUndefined)(req.user, "req.user");
+            const messageInvites = await message_invites_model_1.MessageInviteModel.find({
+                inviteStatus: "pending",
+                sender: new mongoose_1.Types.ObjectId(user.id),
+            }).populate("receiver", "firstName lastName email");
+            return response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.OK,
+                message: "Message Invites fetched",
+                data: messageInvites,
+            });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
+                error: `${error}`,
+            });
+        }
+    },
+];
 const list = [
     auth_mw_1.default,
     validator_mw_1.validateResult,
@@ -137,5 +163,6 @@ exports.default = {
     create,
     list,
     put,
+    senderlist,
 };
 //# sourceMappingURL=messageInvite.service.js.map

@@ -29,6 +29,7 @@ router.delete("/post/delete/:postId", postService.deletePost);
 router.get("/post/get-likes-users/:postId", postService.getLikesUsers);
 
 router.get("/message-invite/list", messageInviteService.list);
+router.get("/message-invite/senderlist", messageInviteService.senderlist);
 router.put("/message-invite/status", messageInviteService.put);
 router.post("/message-invite/create", messageInviteService.create);
 
