@@ -2,7 +2,6 @@ import { Server as SocketIOServer } from "socket.io";
 import { MessageModel } from "./models/message.model";
 import { ConversationModel } from "./models/conversation.model";
 import http from "http";
-import { UserModel } from "./models/user.model";
 import { Types } from "mongoose";
 
 const socket = (server: http.Server) => {
@@ -13,8 +12,8 @@ const socket = (server: http.Server) => {
     },
   });
 
-  // To track connected users
-  const onlineUsers = new Map<string, string>();
+  // Use a Map to link socket IDs to user IDs
+  const userSocketMap = new Map<string, string>();
 
   io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
@@ -22,8 +21,12 @@ const socket = (server: http.Server) => {
     // Online status
     socket.on("online", async (userId: string) => {
       try {
-        onlineUsers.set(userId, socket.id); // Track the user's socket ID
-        await UserModel.findByIdAndUpdate(userId, { online: true });
+        socket.join(userId);
+        userSocketMap.set(socket.id, userId); // Store the association
+
+        // Update the online users list
+        const onlineUsers = Array.from(userSocketMap.values());
+        io.emit("onlineUser", onlineUsers);
       } catch (error) {
         console.error("Error updating user online status:", error);
         socket.emit("error", { message: "Failed to update online status" });
@@ -191,17 +194,14 @@ const socket = (server: http.Server) => {
 
     // Handle socket disconnection
     socket.on("disconnect", async () => {
-      console.log("User disconnected:", socket.id);
-
-      const userId = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
-
+      const userId = userSocketMap.get(socket.id);
       if (userId) {
-        try {
-          await UserModel.findByIdAndUpdate(userId, { online: false });
-          onlineUsers.delete(userId); // Remove from the tracked online users
-        } catch (error) {
-          console.error("Error updating user offline status:", error);
-        }
+        userSocketMap.delete(socket.id);
+        console.log("User disconnected:", socket.id);
+
+        // Update the online users list
+        const onlineUsers = Array.from(userSocketMap.values());
+        io.emit("onlineUser", onlineUsers);
       }
     });
   });

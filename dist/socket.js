@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const socket_io_1 = require("socket.io");
 const message_model_1 = require("./models/message.model");
 const conversation_model_1 = require("./models/conversation.model");
-const user_model_1 = require("./models/user.model");
 const mongoose_1 = require("mongoose");
 const socket = (server) => {
     const io = new socket_io_1.Server(server, {
@@ -12,15 +11,18 @@ const socket = (server) => {
             methods: ["GET", "POST"],
         },
     });
-    // To track connected users
-    const onlineUsers = new Map();
+    // Use a Map to link socket IDs to user IDs
+    const userSocketMap = new Map();
     io.on("connection", (socket) => {
         console.log("A user connected:", socket.id);
         // Online status
         socket.on("online", async (userId) => {
             try {
-                onlineUsers.set(userId, socket.id); // Track the user's socket ID
-                await user_model_1.UserModel.findByIdAndUpdate(userId, { online: true });
+                socket.join(userId);
+                userSocketMap.set(socket.id, userId); // Store the association
+                // Update the online users list
+                const onlineUsers = Array.from(userSocketMap.values());
+                io.emit("onlineUser", onlineUsers);
             }
             catch (error) {
                 console.error("Error updating user online status:", error);
@@ -160,16 +162,13 @@ const socket = (server) => {
         });
         // Handle socket disconnection
         socket.on("disconnect", async () => {
-            console.log("User disconnected:", socket.id);
-            const userId = [...onlineUsers.entries()].find(([_, id]) => id === socket.id)?.[0];
+            const userId = userSocketMap.get(socket.id);
             if (userId) {
-                try {
-                    await user_model_1.UserModel.findByIdAndUpdate(userId, { online: false });
-                    onlineUsers.delete(userId); // Remove from the tracked online users
-                }
-                catch (error) {
-                    console.error("Error updating user offline status:", error);
-                }
+                userSocketMap.delete(socket.id);
+                console.log("User disconnected:", socket.id);
+                // Update the online users list
+                const onlineUsers = Array.from(userSocketMap.values());
+                io.emit("onlineUser", onlineUsers);
             }
         });
     });
