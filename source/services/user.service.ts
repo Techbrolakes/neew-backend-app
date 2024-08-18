@@ -203,6 +203,36 @@ const getEntreprenuers = [
   },
 ];
 
+// const updateUsersProvider = [
+//   async (req: express.Request, res: express.Response) => {
+//     try {
+//       const result = await UserModel.updateMany(
+//         {}, // No filter, so this applies to all users
+//         [
+//           {
+//             $set: {
+//               provider: "local",
+//               provider_id: "$email",
+//             },
+//           },
+//         ],
+//       );
+
+//       return ResponseHandler.sendSuccessResponse({
+//         res,
+//         code: HTTP_CODES.OK,
+//         message: `Updated ${result.modifiedCount} users' provider fields`,
+//       });
+//     } catch (error: any) {
+//       return ResponseHandler.sendErrorResponse({
+//         res,
+//         code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+//         error: `${error}`,
+//       });
+//     }
+//   },
+// ];
+
 // const convert = [
 //   async (req: express.Request, res: express.Response) => {
 //     try {

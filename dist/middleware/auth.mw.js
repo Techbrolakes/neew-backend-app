@@ -50,14 +50,16 @@ async function getUserFromGoogleToken(payload) {
     if (foundUser) {
         return foundUser;
     }
-    return await user_model_1.UserModel.create({
-        firstName: payload.given_name,
-        lastName: payload.family_name,
-        email: payload.email,
-        photo: payload.picture,
-        provider: user_model_1.AuthProvider.google,
-        provider_id: payload.sub,
-    });
+    else {
+        return await user_model_1.UserModel.create({
+            firstName: payload.given_name,
+            lastName: payload.family_name,
+            email: payload.email,
+            photo: payload.picture,
+            provider: user_model_1.AuthProvider.google,
+            provider_id: payload.sub,
+        });
+    }
 }
 async function getUserFromExternal(provider, providerId) {
     return await user_model_1.UserModel.findOne({

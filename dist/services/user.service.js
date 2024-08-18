@@ -178,6 +178,33 @@ const getEntreprenuers = [
         }
     },
 ];
+const updateUsersProvider = [
+    async (req, res) => {
+        try {
+            const result = await user_model_1.UserModel.updateMany({}, // No filter, so this applies to all users
+            [
+                {
+                    $set: {
+                        provider: "local",
+                        provider_id: "$email",
+                    },
+                },
+            ]);
+            return response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.OK,
+                message: `Updated ${result.modifiedCount} users' provider fields`,
+            });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
+                error: `${error}`,
+            });
+        }
+    },
+];
 // const convert = [
 //   async (req: express.Request, res: express.Response) => {
 //     try {
@@ -213,6 +240,7 @@ exports.default = {
     getEntreprenuers,
     getAllUsers,
     getUser,
+    updateUsersProvider,
     // convert,
 };
 //# sourceMappingURL=user.service.js.map

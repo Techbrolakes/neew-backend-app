@@ -55,16 +55,16 @@ async function getUserFromGoogleToken(payload: TokenPayload): Promise<IUserDocum
 
   if (foundUser) {
     return foundUser;
+  } else {
+    return await UserModel.create({
+      firstName: payload.given_name,
+      lastName: payload.family_name,
+      email: payload.email,
+      photo: payload.picture,
+      provider: AuthProvider.google,
+      provider_id: payload.sub,
+    });
   }
-
-  return await UserModel.create({
-    firstName: payload.given_name,
-    lastName: payload.family_name,
-    email: payload.email,
-    photo: payload.picture,
-    provider: AuthProvider.google,
-    provider_id: payload.sub,
-  });
 }
 
 async function getUserFromExternal(provider: AuthProvider, providerId: string) {
