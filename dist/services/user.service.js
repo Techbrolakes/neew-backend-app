@@ -13,6 +13,7 @@ const utils_1 = require("../utils");
 const express_validator_1 = require("express-validator");
 const follow_model_1 = require("../models/follow.model");
 const constants_1 = require("../constants");
+const message_invites_model_1 = require("../models/message-invites.model");
 const debug = (0, debug_1.default)("project:user.service");
 const getUser = [
     auth_mw_1.default,
@@ -178,23 +179,69 @@ const getEntreprenuers = [
         }
     },
 ];
-const updateUsersProvider = [
+const userInvitesStatus = [
+    auth_mw_1.default,
+    (0, express_validator_1.check)("id").isMongoId().withMessage("userId must be a valid id"),
+    validator_mw_1.validateResult,
     async (req, res) => {
         try {
-            const result = await user_model_1.UserModel.updateMany({}, // No filter, so this applies to all users
-            [
-                {
-                    $set: {
-                        provider: "local",
-                        provider_id: "$email",
-                    },
-                },
-            ]);
-            return response_handler_1.default.sendSuccessResponse({
-                res,
-                code: appDefaults_constant_1.HTTP_CODES.OK,
-                message: `Updated ${result.modifiedCount} users' provider fields`,
+            const userId = req.data.id;
+            // Fetch all users except the user making the request
+            const users = await user_model_1.UserModel.find({ _id: { $ne: userId } });
+            // Fetch all invites involving the specified user (either as sender or receiver)
+            const invitesSentByUser = await message_invites_model_1.MessageInviteModel.find({ sender: userId });
+            const invitesReceivedByUser = await message_invites_model_1.MessageInviteModel.find({ receiver: userId });
+            console.log("invitesSentByUser", invitesSentByUser);
+            // Prepare the response data
+            const userInviteStatus = users.map((user) => {
+                // 1.⁠ ⁠Connected
+                // 2.⁠ ⁠⁠You sent to him and pending
+                // 3.⁠ ⁠⁠He sent to you and pending
+                // 4.⁠ ⁠⁠He declined
+                // 5.⁠ ⁠⁠You declined
+                // 6.⁠ ⁠⁠Nobody has sent
+                let status = 6;
+                // Check if the user sent an invite
+                const sentInvite = invitesSentByUser.find((invite) => invite.receiver.toString() === user._id.toString());
+                // Check if the user received an invite
+                const receivedInvite = invitesReceivedByUser.find((invite) => invite.sender.toString() === user._id.toString());
+                if (sentInvite && receivedInvite) {
+                    if (sentInvite.inviteStatus === "accepted" && receivedInvite.inviteStatus === "accepted") {
+                        status = 1;
+                    }
+                    else if (sentInvite.inviteStatus === "pending" && receivedInvite.inviteStatus === "accepted") {
+                        status = 2;
+                    }
+                    else if (sentInvite.inviteStatus === "accepted" && receivedInvite.inviteStatus === "pending") {
+                        status = 3;
+                    }
+                    else if (receivedInvite.inviteStatus === "rejected") {
+                        status = 4;
+                    }
+                    else if (sentInvite.inviteStatus === "rejected") {
+                        status = 5;
+                    }
+                }
+                else if (sentInvite) {
+                    if (sentInvite.inviteStatus === "pending") {
+                        status = 2;
+                    }
+                }
+                else if (receivedInvite) {
+                    if (receivedInvite.inviteStatus === "pending") {
+                        status = 3;
+                    }
+                }
+                return {
+                    userId: user._id,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email,
+                    photo: user.photo,
+                    status,
+                };
             });
+            return res.status(200).json({ users: userInviteStatus });
         }
         catch (error) {
             return response_handler_1.default.sendErrorResponse({
@@ -205,6 +252,34 @@ const updateUsersProvider = [
         }
     },
 ];
+// const updateUsersProvider = [
+//   async (req: express.Request, res: express.Response) => {
+//     try {
+//       const result = await UserModel.updateMany(
+//         {}, // No filter, so this applies to all users
+//         [
+//           {
+//             $set: {
+//               provider: "local",
+//               provider_id: "$email",
+//             },
+//           },
+//         ],
+//       );
+//       return ResponseHandler.sendSuccessResponse({
+//         res,
+//         code: HTTP_CODES.OK,
+//         message: `Updated ${result.modifiedCount} users' provider fields`,
+//       });
+//     } catch (error: any) {
+//       return ResponseHandler.sendErrorResponse({
+//         res,
+//         code: HTTP_CODES.INTERNAL_SERVER_ERROR,
+//         error: `${error}`,
+//       });
+//     }
+//   },
+// ];
 // const convert = [
 //   async (req: express.Request, res: express.Response) => {
 //     try {
@@ -240,7 +315,7 @@ exports.default = {
     getEntreprenuers,
     getAllUsers,
     getUser,
-    updateUsersProvider,
+    userInvitesStatus,
     // convert,
 };
 //# sourceMappingURL=user.service.js.map

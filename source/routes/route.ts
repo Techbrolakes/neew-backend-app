@@ -44,6 +44,7 @@ router.get("/posts/list", postService.getPosts);
 router.get("/users", userService.getAllUsers);
 router.get("/users/:userId", userService.getUser);
 router.get("/user/entreprenuers", userService.getEntreprenuers);
+router.get("/users/checkInvites/:id", userService.userInvitesStatus);
 
 router.get("/profile/me", profileService.me);
 router.put("/profile/update", profileService.update);

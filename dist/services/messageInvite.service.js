@@ -101,6 +101,21 @@ const put = [
                     message: "Message Invite Accepted",
                 });
             }
+            if (req.data.inviteStatus === "rejected") {
+                await Promise.all([
+                    message_invites_model_1.MessageInviteModel.findOneAndUpdate({ _id: req.data.inviteId }, { inviteStatus: "rejected" }),
+                    notification_model_1.NotificationModel.create({
+                        message: "Your message invite has been rejected",
+                        notificationType: "message-invite",
+                        userId: messageInvite.sender,
+                    }),
+                ]);
+                return response_handler_1.default.sendSuccessResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.OK,
+                    message: "Message Invite Rejected",
+                });
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
