@@ -124,6 +124,7 @@ exports.continentToCountries = {
     ],
     northAmerica: [
         "United States",
+        "USA",
         "Canada",
         "Mexico",
         "Guatemala",

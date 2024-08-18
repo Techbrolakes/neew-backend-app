@@ -61,7 +61,7 @@ async function getUserFromGoogleToken(payload) {
 }
 async function getUserFromExternal(provider, providerId) {
     return await user_model_1.UserModel.findOne({
-        provider: provider.toString(),
+        provider,
         provider_id: providerId,
     }, ["_id"]).lean();
 }

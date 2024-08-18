@@ -121,6 +121,7 @@ export const continentToCountries: Record<string, string[]> = {
   ],
   northAmerica: [
     "United States",
+    "USA",
     "Canada",
     "Mexico",
     "Guatemala",

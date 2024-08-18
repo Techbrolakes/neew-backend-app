@@ -70,7 +70,7 @@ async function getUserFromGoogleToken(payload: TokenPayload): Promise<IUserDocum
 async function getUserFromExternal(provider: AuthProvider, providerId: string) {
   return await UserModel.findOne(
     {
-      provider: provider.toString(),
+      provider,
       provider_id: providerId,
     },
     ["_id"],
