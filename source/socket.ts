@@ -3,206 +3,155 @@ import { MessageModel } from "./models/message.model";
 import { ConversationModel } from "./models/conversation.model";
 import http from "http";
 import { Types } from "mongoose";
+import frontUserUtils from "./utils/frontUser.utils";
+import { getUser } from "./middleware/auth.mw";
+import config from "./utils/config";
+import { getConversation } from "./core/conversation.core";
+import { UserModel } from "./models/user.model";
 
 const socket = (server: http.Server) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: "*", // Adjust origin as necessary for security
-      methods: ["GET", "POST"],
+      origin: config.frontUrl,
+      credentials: true,
     },
   });
 
-  // Use a Map to link socket IDs to user IDs
-  const userSocketMap = new Map<string, string>();
+  const onlineUser = new Set();
 
-  io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id);
+  io.on("connection", async (socket) => {
+    console.log("connect User ", socket.id);
 
-    // Online status
-    socket.on("online", async (userId: string) => {
-      try {
-        socket.join(userId);
-        userSocketMap.set(socket.id, userId); // Store the association
+    const token = socket.handshake.auth.token;
 
-        // Update the online users list
-        const onlineUsers = Array.from(userSocketMap.values());
-        io.emit("onlineUser", onlineUsers);
-      } catch (error) {
-        console.error("Error updating user online status:", error);
-        socket.emit("error", { message: "Failed to update online status" });
-      }
+    // current user details
+    const decoded = await frontUserUtils.decodeToken(token);
+    const user = await getUser(decoded);
+    const userId = user._id.toString();
+
+    // create a room
+    socket.join(userId);
+    onlineUser.add(userId);
+
+    io.emit("onlineUser", Array.from(onlineUser));
+
+    socket.on("message-page", async (userId) => {
+      const userDetails = await UserModel.findById(userId).select("-password");
+
+      const payload = {
+        id: userDetails?._id,
+        firstName: userDetails?.firstName,
+        lastName: userDetails?.lastName,
+        email: userDetails?.email,
+        photo: userDetails?.photo,
+        persona: userDetails?.persona,
+        online: onlineUser.has(userId),
+      };
+
+      socket.emit("message-user", payload);
+
+      //get previous message
+      const getConversationMessage = await ConversationModel.findOne({
+        $or: [
+          { sender: user?._id, receiver: userId },
+          { sender: userId, receiver: user?._id },
+        ],
+      })
+        .populate("messages")
+        .sort({ updatedAt: -1 });
+
+      socket.emit("message", getConversationMessage?.messages || []);
     });
 
-    // Join a conversation room
-    socket.on("joinConversation", (conversationId: string) => {
-      socket.join(conversationId);
-      console.log(`Socket ${socket.id} joined conversation ${conversationId}`);
-    });
+    // Send message
+    socket.on("new message", async (data) => {
+      let conversation = await ConversationModel.findOne({
+        $or: [
+          { sender: data?.sender, receiver: data?.receiver },
+          { sender: data?.receiver, receiver: data?.sender },
+        ],
+      });
 
-    // Get all conversations
-    socket.on("getAllConversations", async (userId: string) => {
-      try {
-        const conversations = await ConversationModel.find({ users: userId })
-          .populate("users", "firstName lastName email photo")
-          .sort({ updatedAt: -1 })
-          .lean();
-
-        const conversationIds = conversations.map((conv: any) => conv._id);
-        const messages = await MessageModel.aggregate([
-          { $match: { conversationId: { $in: conversationIds } } },
-          { $sort: { createdAt: -1 } },
-          {
-            $group: {
-              _id: "$conversationId",
-              lastMessage: { $first: "$$ROOT" },
-            },
-          },
-        ]);
-
-        const lastMessagesMap = messages.reduce((acc: any, msg: any) => {
-          acc[msg._id.toString()] = msg.lastMessage;
-          return acc;
-        }, {});
-
-        const filteredConversations = conversations.map((conv: any) => {
-          const otherUser = conv.users.find((user: any) => user._id.toString() !== userId.toString());
-          return {
-            ...conv,
-            lastMessage: lastMessagesMap[conv._id.toString()] || null,
-            otherUser,
-          };
+      //if conversation is not available
+      if (!conversation) {
+        await ConversationModel.create({
+          sender: data.sender,
+          receiver: data.receiver,
         });
-
-        const unreadConversationsCount = filteredConversations.filter((conv: any) => conv.hasUnread).length;
-
-        socket.emit("allConversations", {
-          conversations: filteredConversations,
-          unreadConversationsCount,
-        });
-      } catch (error) {
-        console.error("Error fetching conversations:", error);
-        socket.emit("error", { message: "Failed to fetch conversations" });
       }
+
+      const newMessage = await MessageModel.create({
+        text: data.text,
+        imageUrl: data.imageUrl,
+        videoUrl: data.videoUrl,
+        sender: userId,
+      });
+
+      await ConversationModel.findOneAndUpdate(
+        {
+          $or: [
+            { sender: data?.sender, receiver: data?.receiver },
+            { sender: data?.receiver, receiver: data?.sender },
+          ],
+        },
+        { $push: { messages: newMessage._id } },
+        { new: true },
+      );
+
+      const getConversationMessage = await ConversationModel.findOne({
+        $or: [
+          { sender: data?.sender, receiver: data?.receiver },
+          { sender: data?.receiver, receiver: data?.sender },
+        ],
+      })
+        .populate("messages")
+        .sort({ updatedAt: -1 });
+
+      console.log("getConversationMessage", getConversationMessage);
+
+      io.to(data?.sender).emit("message", getConversationMessage?.messages || []);
+      io.to(data?.receiver).emit("message", getConversationMessage?.messages || []);
+
+      //send conversation
+      const conversationSender = await getConversation(data?.sender);
+      const conversationReceiver = await getConversation(data?.receiver);
+
+      io.to(data?.sender).emit("conversation", conversationSender);
+      io.to(data?.receiver).emit("conversation", conversationReceiver);
     });
 
-    // Get conversation by ID
-    socket.on("getConversation", async (userId: string, conversationId: string) => {
-      try {
-        const conversation = await ConversationModel.findOne({
-          _id: new Types.ObjectId(conversationId),
-        }).populate("users", "firstName lastName email photo persona");
+    //sidebar
+    socket.on("sidebar", async (currentUserId) => {
+      const conversation = await getConversation(currentUserId);
 
-        if (!conversation) {
-          socket.emit("error", { message: "Conversation not found" });
-          return;
-        }
-
-        const messages = await MessageModel.find({
-          conversationId: new Types.ObjectId(conversationId),
-        });
-
-        const otherUser = conversation.users.find((user: any) => user._id.toString() !== userId.toString());
-
-        const data = {
-          ...conversation.toJSON(),
-          messages,
-          otherUser,
-        };
-
-        socket.emit("conversation", data);
-      } catch (error) {
-        console.error("Error fetching conversation:", error);
-        socket.emit("error", { message: "Failed to fetch conversation" });
-      }
+      socket.emit("conversation", conversation);
     });
 
-    // Send a message
-    socket.on("sendMessage", async (messageData) => {
-      const { text, image, conversationId, senderId } = messageData;
+    // seen message
+    socket.on("seen", async (senderId) => {
+      let conversation = await ConversationModel.findOne({
+        $or: [
+          { sender: userId, receiver: senderId },
+          { sender: senderId, receiver: userId },
+        ],
+      });
 
-      try {
-        const message = new MessageModel({
-          text,
-          image,
-          conversationId,
-          senderId,
-        });
+      const conversationMessageId = conversation?.messages || [];
 
-        await message.save();
+      await MessageModel.updateMany({ _id: { $in: conversationMessageId }, sender: senderId }, { $set: { seen: true } });
 
-        // Emit the new message to all clients in the conversation
-        io.to(conversationId).emit("messageReceived", message);
+      //send conversation
+      const conversationSender = await getConversation(user?._id?.toString());
+      const conversationReceiver = await getConversation(senderId);
 
-        // Update conversation with last message timestamp and unread count
-        await ConversationModel.findByIdAndUpdate(
-          conversationId,
-          {
-            $set: { lastMessageAt: new Date(), hasUnread: true },
-            $inc: { unreadCount: 1 },
-            $push: { messages: message._id },
-          },
-          { new: true },
-        );
-
-        // Notify all clients in the conversation about the updated unread count
-        io.to(conversationId).emit("conversationUpdated", {
-          conversationId,
-          unreadCount: (await ConversationModel.findById(conversationId)).unreadCount,
-        });
-      } catch (error) {
-        console.error("Error sending message:", error);
-        socket.emit("error", { message: "Failed to send message" });
-      }
+      io.to(userId).emit("conversation", conversationSender);
+      io.to(senderId).emit("conversation", conversationReceiver);
     });
 
-    // Get all messages for a conversation
-    socket.on("getAllMessages", async (conversationId: string) => {
-      try {
-        const messages = await MessageModel.find({ conversationId }).sort({ createdAt: 1 }).lean();
-
-        socket.emit("allMessages", messages);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-        socket.emit("error", { message: "Failed to fetch messages" });
-      }
-    });
-
-    // Mark messages as seen
-    socket.on("markMessagesSeen", async (conversationId: string) => {
-      try {
-        await MessageModel.updateMany({ conversationId, status: "delivered" }, { $set: { status: "seen" } });
-
-        const conversation = await ConversationModel.findByIdAndUpdate(
-          conversationId,
-          { unreadCount: 0, hasUnread: false },
-          { new: true },
-        ).lean();
-
-        // Notify all clients in the conversation about the updated conversation
-        io.to(conversationId).emit("conversationUpdated", conversation);
-      } catch (error) {
-        console.error("Error marking messages as seen:", error);
-        socket.emit("error", { message: "Failed to mark messages as seen" });
-      }
-    });
-
-    // Handle socket errors
-    socket.on("error", (error) => {
-      console.error("Socket error:", error);
-      socket.emit("error", { message: "Socket encountered an error" });
-    });
-
-    // Handle socket disconnection
-    socket.on("disconnect", async () => {
-      const userId = userSocketMap.get(socket.id);
-      if (userId) {
-        userSocketMap.delete(socket.id);
-        console.log("User disconnected:", socket.id);
-
-        // Update the online users list
-        const onlineUsers = Array.from(userSocketMap.values());
-        io.emit("onlineUser", onlineUsers);
-      }
+    // Disconnect
+    socket.on("disconnect", () => {
+      onlineUser.delete(userId);
+      console.log("disconnect user ", socket.id);
     });
   });
 

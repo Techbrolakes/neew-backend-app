@@ -23,7 +23,9 @@ const senderlist = [
       const messageInvites = await MessageInviteModel.find({
         inviteStatus: "pending",
         sender: new Types.ObjectId(user.id),
-      }).populate("receiver", "firstName lastName email");
+      })
+        .populate("receiver", "firstName lastName email")
+        .populate("sender", "firstName lastName email");
 
       return ResponseHandler.sendSuccessResponse({
         res,
@@ -93,7 +95,8 @@ const put = [
           MessageInviteModel.findOneAndUpdate({ _id: req.data.inviteId }, { inviteStatus: "accepted" }),
 
           ConversationModel.create({
-            users: [messageInvite.sender, messageInvite.receiver],
+            receiver: messageInvite.receiver,
+            sender: messageInvite.sender,
           }),
 
           NotificationModel.create({

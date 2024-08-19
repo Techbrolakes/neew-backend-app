@@ -7,7 +7,6 @@ import userService from "../services/user.service";
 import notificationService from "../services/notification.service";
 import messageInviteService from "../services/messageInvite.service";
 import messageService from "../services/message.service";
-import conversationService from "../services/conversation.service";
 import profileService from "../services/profile.service";
 
 const router = express.Router();
@@ -35,9 +34,6 @@ router.post("/message-invite/create", messageInviteService.create);
 
 router.get("/message/seen", messageService.seen);
 router.post("/message/create", messageService.post);
-
-router.get("/conversation/list", conversationService.list);
-router.get("/conversation/:conversationId", conversationService.get);
 
 router.get("/posts/list", postService.getPosts);
 

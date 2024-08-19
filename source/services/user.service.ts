@@ -219,8 +219,6 @@ const userInvitesStatus = [
       const invitesSentByUser = await MessageInviteModel.find({ sender: userId });
       const invitesReceivedByUser = await MessageInviteModel.find({ receiver: userId });
 
-      console.log("invitesSentByUser", invitesSentByUser);
-
       // Prepare the response data
       const userInviteStatus = users.map((user) => {
         // 1.⁠ ⁠Connected

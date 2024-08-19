@@ -1,20 +1,20 @@
 import mongoose, { Types } from "mongoose";
 
 export interface IMessage {
-  text: string;
-  image: string;
-  conversationId: string | Types.ObjectId;
-  senderId: string;
-  status: "delivered" | "seen"; // Status field with possible values
+  text?: string;
+  seen: boolean;
+  imageUrl?: string;
+  videoUrl?: string;
+  sender: Types.ObjectId;
 }
 
 const schema = new mongoose.Schema(
   {
-    conversationId: { ref: "Conversation", type: mongoose.Types.ObjectId },
-    image: { required: false, type: String },
-    senderId: { ref: "User", type: mongoose.Types.ObjectId },
-    status: { default: "delivered", enum: ["delivered", "seen"], type: String },
-    text: { required: false, type: String },
+    text: { type: String },
+    seen: { type: Boolean, default: false },
+    imageUrl: { type: String },
+    videoUrl: { type: String },
+    sender: { type: Types.ObjectId, ref: "User" },
   },
   {
     timestamps: true,

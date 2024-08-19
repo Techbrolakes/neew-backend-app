@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getUser = void 0;
 const debug_1 = __importDefault(require("debug"));
 const appDefaults_constant_1 = require("../constants/appDefaults.constant");
 const response_handler_1 = __importDefault(require("../utils/response-handler"));
@@ -45,6 +46,7 @@ async function getUser(decoded) {
             return undefined;
     }
 }
+exports.getUser = getUser;
 async function getUserFromGoogleToken(payload) {
     const foundUser = await getUserFromExternal(user_model_1.AuthProvider.google, payload.sub);
     if (foundUser) {

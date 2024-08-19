@@ -39,7 +39,7 @@ export default async function authMw(req: express.Request, res: express.Response
   }
 }
 
-async function getUser(decoded: DecodedToken) {
+export async function getUser(decoded: DecodedToken) {
   switch (decoded.provider) {
     case "local":
       return await UserModel.findById((decoded.payload as LocalTokenPayload).id, ["_id"]).lean();

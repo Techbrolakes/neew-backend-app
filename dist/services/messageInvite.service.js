@@ -24,7 +24,9 @@ const senderlist = [
             const messageInvites = await message_invites_model_1.MessageInviteModel.find({
                 inviteStatus: "pending",
                 sender: new mongoose_1.Types.ObjectId(user.id),
-            }).populate("receiver", "firstName lastName email");
+            })
+                .populate("receiver", "firstName lastName email")
+                .populate("sender", "firstName lastName email");
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
@@ -87,7 +89,8 @@ const put = [
                 await Promise.all([
                     message_invites_model_1.MessageInviteModel.findOneAndUpdate({ _id: req.data.inviteId }, { inviteStatus: "accepted" }),
                     conversation_model_1.ConversationModel.create({
-                        users: [messageInvite.sender, messageInvite.receiver],
+                        receiver: messageInvite.receiver,
+                        sender: messageInvite.sender,
                     }),
                     notification_model_1.NotificationModel.create({
                         message: "Your message invite has been accepted",

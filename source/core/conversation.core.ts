@@ -1,32 +1,37 @@
 import { ConversationModel } from "../models/conversation.model";
-import { MessageModel } from "../models/message.model";
 
-async function updateUnreadCountAndFlag(conversationId: string, userId: string): Promise<void> {
-  try {
-    // Count unread messages where senderId is not equal to userId
-    const unreadCount = await MessageModel.countDocuments({
-      conversationId,
-      senderId: { $ne: userId },
-      status: "delivered",
+export async function getConversation(currentUserId: any) {
+  if (currentUserId) {
+    const currentUserConversation = await ConversationModel.find({
+      $or: [{ sender: currentUserId }, { receiver: currentUserId }],
+    })
+      .sort({ updatedAt: -1 })
+      .populate("messages")
+      .populate("sender")
+      .populate("receiver");
+
+    const conversation = currentUserConversation.map((conv) => {
+      const countUnseenMsg = conv?.messages?.reduce((preve, curr: any) => {
+        const msgByUserId = curr?.sender?.toString();
+
+        if (msgByUserId !== currentUserId) {
+          return preve + (curr?.seen ? 0 : 1);
+        } else {
+          return preve;
+        }
+      }, 0);
+
+      return {
+        _id: conv?._id,
+        sender: conv?.sender,
+        receiver: conv?.receiver,
+        unseenMsg: countUnseenMsg,
+        lastMsg: conv.messages[conv?.messages?.length - 1],
+      };
     });
 
-    // Determine if there are any unread messages
-    const hasUnread = unreadCount > 0;
-
-    // Update the conversation with the unread count and flag
-    await ConversationModel.findByIdAndUpdate(
-      conversationId,
-      { hasUnread, unreadCount },
-      { new: true }, // Return the updated document
-    );
-  } catch (error) {
-    console.error(`Error updating unread count and flag for conversation ${conversationId}:`, error);
-    throw error;
+    return conversation;
+  } else {
+    return [];
   }
 }
-
-const conversationCore = {
-  updateUnreadCountAndFlag,
-};
-
-export default conversationCore;

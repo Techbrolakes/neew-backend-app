@@ -7,7 +7,6 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const morgan_1 = __importDefault(require("morgan"));
 const route_1 = __importDefault(require("../routes/route"));
-const testRoute_1 = __importDefault(require("../routes/testRoute"));
 function middlewareNotFound(req, res, next) {
     const err = new Error("Not Found: " + req.url);
     err.status = 404;
@@ -33,9 +32,6 @@ function setupExpress(app) {
     }));
     app.use((0, cors_1.default)());
     app.use("/api", route_1.default);
-    if (process.env.NODE_ENV === "test") {
-        app.use("/api/test", testRoute_1.default);
-    }
     app.use(middlewareNotFound);
     app.use(middlewareError);
     console.log("Finish setting up Express");

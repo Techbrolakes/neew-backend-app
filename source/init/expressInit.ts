@@ -3,7 +3,6 @@ import express, { Express } from "express";
 import morgan from "morgan";
 
 import route from "../routes/route";
-import testRoute from "../routes/testRoute";
 
 function middlewareNotFound(req: express.Request, res: express.Response, next: express.NextFunction) {
   const err = new Error("Not Found: " + req.url) as any;
@@ -39,10 +38,6 @@ function setupExpress(app: Express) {
   app.use(cors());
 
   app.use("/api", route);
-
-  if (process.env.NODE_ENV === "test") {
-    app.use("/api/test", testRoute);
-  }
 
   app.use(middlewareNotFound);
   app.use(middlewareError);
