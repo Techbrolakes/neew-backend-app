@@ -207,13 +207,29 @@ const getEntreprenuers = [
 const userInvitesStatus = [
   authMw,
   check("id").isMongoId().withMessage("userId must be a valid id"),
+  query("search").optional().isString().withMessage("Search must be a string"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
       const userId = req.data.id;
 
+      const { search } = req.query as any;
+
+      const filter: any = {};
+
+      if (search) {
+        const searchPattern = new RegExp(search, "i");
+        filter.$or = [{ firstName: searchPattern }, { lastName: searchPattern }, { email: searchPattern }];
+      }
+
+      // Combine the existing condition with the filter
+      const combinedFilter = {
+        _id: { $ne: userId }, // Exclude the user making the request
+        ...filter, // Add the search filter if present
+      };
+
       // Fetch all users except the user making the request
-      const users = await UserModel.find({ _id: { $ne: userId } });
+      const users = await UserModel.find(combinedFilter).select("-password").lean(true);
 
       // Fetch all invites involving the specified user (either as sender or receiver)
       const invitesSentByUser = await MessageInviteModel.find({ sender: userId });
