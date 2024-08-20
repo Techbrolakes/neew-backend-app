@@ -2,15 +2,17 @@ import { Server as SocketIOServer } from "socket.io";
 import { MessageModel } from "./models/message.model";
 import { ConversationModel } from "./models/conversation.model";
 import http from "http";
+import { Types } from "mongoose";
 import frontUserUtils from "./utils/frontUser.utils";
 import { getUser } from "./middleware/auth.mw";
+import config from "./utils/config";
 import { getConversation } from "./core/conversation.core";
 import { UserModel } from "./models/user.model";
 
 const socket = (server: http.Server) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: "*",
+      origin: config.frontUrl,
       credentials: true,
     },
   });
