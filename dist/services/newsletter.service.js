@@ -8,14 +8,14 @@ const validator_mw_1 = require("../middleware/validator.mw");
 const express_validator_1 = require("express-validator");
 const response_handler_1 = __importDefault(require("../utils/response-handler"));
 const appDefaults_constant_1 = require("../constants/appDefaults.constant");
-const newletter_model_1 = require("../models/newletter.model");
+const newsletter_model_1 = require("../models/newsletter.model");
 const debug = (0, debug_1.default)("project:newsletter.service");
 const subscribe = [
     (0, express_validator_1.body)("email").isEmail().withMessage("Email must be a valid email"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
-            const email = await newletter_model_1.NewletterModel.findOne({ email: req.body.email });
+            const email = await newsletter_model_1.NewsletterModel.findOne({ email: req.body.email });
             if (email) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
@@ -23,7 +23,7 @@ const subscribe = [
                     error: "Email already subscribed",
                 });
             }
-            await newletter_model_1.NewletterModel.create({
+            await newsletter_model_1.NewsletterModel.create({
                 email: req.body.email,
             });
             response_handler_1.default.sendSuccessResponse({
@@ -46,7 +46,7 @@ const unsubscribe = [
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
-            const email = await newletter_model_1.NewletterModel.findOne({ email: req.body.email });
+            const email = await newsletter_model_1.NewsletterModel.findOne({ email: req.body.email });
             if (!email) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
@@ -54,7 +54,7 @@ const unsubscribe = [
                     error: "Email not subscribed",
                 });
             }
-            await newletter_model_1.NewletterModel.deleteOne({ email: req.body.email });
+            await newsletter_model_1.NewsletterModel.deleteOne({ email: req.body.email });
             response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
@@ -73,7 +73,7 @@ const unsubscribe = [
 const get = [
     async (req, res) => {
         try {
-            const emails = await newletter_model_1.NewletterModel.find();
+            const emails = await newsletter_model_1.NewsletterModel.find();
             response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,

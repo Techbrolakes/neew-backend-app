@@ -6,9 +6,8 @@ import authMw from "../middleware/auth.mw";
 import ResponseHandler from "../utils/response-handler";
 import { HTTP_CODES } from "../constants/appDefaults.constant";
 import { throwIfUndefined } from "../utils";
-import { MessageModel } from "../models/message.model";
-import { ConversationModel } from "../models/conversation.model";
 import { UserModel } from "../models/user.model";
+import { NewsletterModel } from "../models/newsletter.model";
 
 const debug = Debug("project:profile.service");
 
@@ -80,15 +79,20 @@ const me = [
     try {
       const user = throwIfUndefined(req.user, "req.user");
 
-      console.log('user', user)
-
       const currentUser = await UserModel.findById(user.id).select("-password").lean(true);
+
+      const doesExitInNewsletter = await NewsletterModel.findOne({ email: currentUser.email });
+
+      const response = {
+        ...currentUser,
+        isSubscribed: !!doesExitInNewsletter,
+      };
 
       return ResponseHandler.sendSuccessResponse({
         res,
         code: HTTP_CODES.OK,
         message: "User fetched successfully",
-        data: currentUser,
+        data: response,
       });
     } catch (error: any) {
       return ResponseHandler.sendErrorResponse({

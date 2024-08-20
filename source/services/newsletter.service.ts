@@ -4,7 +4,7 @@ import { validateResult } from "../middleware/validator.mw";
 import { body } from "express-validator";
 import ResponseHandler from "../utils/response-handler";
 import { HTTP_CODES } from "../constants/appDefaults.constant";
-import { NewletterModel } from "../models/newletter.model";
+import { NewsletterModel } from "../models/newsletter.model";
 
 const debug = Debug("project:newsletter.service");
 
@@ -13,7 +13,7 @@ const subscribe = [
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
-      const email = await NewletterModel.findOne({ email: req.body.email });
+      const email = await NewsletterModel.findOne({ email: req.body.email });
 
       if (email) {
         return ResponseHandler.sendErrorResponse({
@@ -23,7 +23,7 @@ const subscribe = [
         });
       }
 
-      await NewletterModel.create({
+      await NewsletterModel.create({
         email: req.body.email,
       });
 
@@ -47,7 +47,7 @@ const unsubscribe = [
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
-      const email = await NewletterModel.findOne({ email: req.body.email });
+      const email = await NewsletterModel.findOne({ email: req.body.email });
 
       if (!email) {
         return ResponseHandler.sendErrorResponse({
@@ -57,7 +57,7 @@ const unsubscribe = [
         });
       }
 
-      await NewletterModel.deleteOne({ email: req.body.email });
+      await NewsletterModel.deleteOne({ email: req.body.email });
 
       ResponseHandler.sendSuccessResponse({
         res,
@@ -77,7 +77,7 @@ const unsubscribe = [
 const get = [
   async (req: express.Request, res: express.Response) => {
     try {
-      const emails = await NewletterModel.find();
+      const emails = await NewsletterModel.find();
 
       ResponseHandler.sendSuccessResponse({
         res,

@@ -11,4 +11,4 @@ const schema = new mongoose_1.default.Schema({
     timestamps: true,
 });
 exports.NewsletterModel = mongoose_1.default.model("Newsletter", schema);
-//# sourceMappingURL=newletter.model.js.map
+//# sourceMappingURL=newsletter.model.js.map
