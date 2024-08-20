@@ -7,7 +7,7 @@ const config: Config = {
   // database: "mongodb+srv://bdaiveed:neew2023@neewcluster.dzzdlnv.mongodb.net/?retryWrites=true&w=majority&appName=NeewCluster",
   database: "mongodb+srv://lekandar:helloworld@neew-cluster.5wiort4.mongodb.net/",
   databaseName: "neew-database",
-  frontUrl: "https://neew-frontend-app.vercel.app/",
+  frontUrl: "https://neew-app.vercel.app",
   imageFolder: path.join(
     __dirname,
     "..", // src
