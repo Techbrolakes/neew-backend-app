@@ -6,8 +6,8 @@ import postService from "../services/post.service";
 import userService from "../services/user.service";
 import notificationService from "../services/notification.service";
 import messageInviteService from "../services/messageInvite.service";
-import messageService from "../services/message.service";
 import profileService from "../services/profile.service";
+import newsletterService from "../services/newsletter.service";
 
 const router = express.Router();
 
@@ -32,9 +32,6 @@ router.get("/message-invite/senderlist", messageInviteService.senderlist);
 router.put("/message-invite/status", messageInviteService.put);
 router.post("/message-invite/create", messageInviteService.create);
 
-router.get("/message/seen", messageService.seen);
-router.post("/message/create", messageService.post);
-
 router.get("/posts/list", postService.getPosts);
 
 router.get("/users", userService.getAllUsers);
@@ -51,5 +48,9 @@ router.get("/user/followers/:userId", followService.getFollowers);
 router.get("/notifications", notificationService.getNotifications);
 router.get("/user-notifications", notificationService.getUserNotifications);
 router.put("/user-notifications/mark-as-read", notificationService.markNotificationsAsRead);
+
+router.get("/newsletter/get", newsletterService.get);
+router.post("/newsletter/subscribe", newsletterService.subscribe);
+router.post("/newsletter/unsubscribe", newsletterService.unsubscribe);
 
 export default router;

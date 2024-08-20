@@ -1,0 +1,1 @@
+{"version":3,"file":"newletter.model.js","sourceRoot":"","sources":["../../source/models/newletter.model.ts"],"names":[],"mappings":";;;;;;AAAA,wDAAgC;AAMhC,MAAM,MAAM,GAAG,IAAI,kBAAQ,CAAC,MAAM,CAChC;IACE,KAAK,EAAE,EAAE,IAAI,EAAE,MAAM,EAAE;CACxB,EACD;IACE,UAAU,EAAE,IAAI;CACjB,CACF,CAAC;AAIW,QAAA,cAAc,GAAG,kBAAQ,CAAC,KAAK,CAAqB,WAAW,EAAE,MAAM,CAAC,CAAC"}
