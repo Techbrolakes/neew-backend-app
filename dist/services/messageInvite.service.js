@@ -92,11 +92,11 @@ const put = [
                         receiver: messageInvite.receiver,
                         sender: messageInvite.sender,
                     }),
-                    notification_model_1.NotificationModel.create({
-                        message: "Your message invite has been accepted",
-                        notificationType: "message-invite",
-                        userId: messageInvite.sender,
-                    }),
+                    // NotificationModel.create({
+                    //   message: "Your message invite has been accepted",
+                    //   notificationType: "message-invite",
+                    //   userId: messageInvite.sender,
+                    // }),
                 ]);
                 return response_handler_1.default.sendSuccessResponse({
                     res,
@@ -107,11 +107,11 @@ const put = [
             if (req.data.inviteStatus === "rejected") {
                 await Promise.all([
                     message_invites_model_1.MessageInviteModel.findOneAndUpdate({ _id: req.data.inviteId }, { inviteStatus: "rejected" }),
-                    notification_model_1.NotificationModel.create({
-                        message: "Your message invite has been rejected",
-                        notificationType: "message-invite",
-                        userId: messageInvite.sender,
-                    }),
+                    // NotificationModel.create({
+                    //   message: "Your message invite has been rejected",
+                    //   notificationType: "message-invite",
+                    //   userId: messageInvite.sender,
+                    // }),
                 ]);
                 return response_handler_1.default.sendSuccessResponse({
                     res,

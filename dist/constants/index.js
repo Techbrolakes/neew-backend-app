@@ -161,7 +161,7 @@ exports.continentToCountries = {
         "Greenland",
         "Isle of MAN",
     ],
-    northAmerica: [
+    "north america": [
         "United States",
         "USA",
         "Canada",
@@ -190,7 +190,7 @@ exports.continentToCountries = {
         "Saint Pierre and Miquelon",
         "US",
     ],
-    southAmerica: [
+    "south america": [
         "Brazil",
         "Argentina",
         "Colombia",

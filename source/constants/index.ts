@@ -158,7 +158,7 @@ export const continentToCountries: Record<string, string[]> = {
     "Greenland",
     "Isle of MAN",
   ],
-  northAmerica: [
+  "north america": [
     "United States",
     "USA",
     "Canada",
@@ -187,7 +187,7 @@ export const continentToCountries: Record<string, string[]> = {
     "Saint Pierre and Miquelon",
     "US",
   ],
-  southAmerica: [
+  "south america": [
     "Brazil",
     "Argentina",
     "Colombia",

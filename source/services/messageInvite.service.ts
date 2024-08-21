@@ -99,11 +99,11 @@ const put = [
             sender: messageInvite.sender,
           }),
 
-          NotificationModel.create({
-            message: "Your message invite has been accepted",
-            notificationType: "message-invite",
-            userId: messageInvite.sender,
-          }),
+          // NotificationModel.create({
+          //   message: "Your message invite has been accepted",
+          //   notificationType: "message-invite",
+          //   userId: messageInvite.sender,
+          // }),
         ]);
 
         return ResponseHandler.sendSuccessResponse({
@@ -117,11 +117,11 @@ const put = [
         await Promise.all([
           MessageInviteModel.findOneAndUpdate({ _id: req.data.inviteId }, { inviteStatus: "rejected" }),
 
-          NotificationModel.create({
-            message: "Your message invite has been rejected",
-            notificationType: "message-invite",
-            userId: messageInvite.sender,
-          }),
+          // NotificationModel.create({
+          //   message: "Your message invite has been rejected",
+          //   notificationType: "message-invite",
+          //   userId: messageInvite.sender,
+          // }),
         ]);
 
         return ResponseHandler.sendSuccessResponse({
