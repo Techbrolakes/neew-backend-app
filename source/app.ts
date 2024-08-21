@@ -106,7 +106,9 @@ app.get("/auth/google/callback", async (req, res) => {
     });
   }
   // Redirect to frontend with tokens and user details
-  res.redirect(`${config.frontUrl}/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
+  // res.redirect(`${config.frontUrl}/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
+
+  res.redirect(`http://localhost:3000/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
 });
 
 async function start() {
