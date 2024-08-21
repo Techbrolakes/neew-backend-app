@@ -22,7 +22,7 @@ export async function generateToken(data: any) {
         debug(err.message);
       }
 
-      resolve(token);
+    resolve(token);
     });
   });
 }

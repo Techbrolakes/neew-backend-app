@@ -2,9 +2,7 @@ import { Server as SocketIOServer } from "socket.io";
 import { MessageModel } from "./models/message.model";
 import { ConversationModel } from "./models/conversation.model";
 import http from "http";
-import { Types } from "mongoose";
 import frontUserUtils from "./utils/frontUser.utils";
-import { getUser } from "./middleware/auth.mw";
 import config from "./utils/config";
 import { getConversation } from "./core/conversation.core";
 import { UserModel } from "./models/user.model";
@@ -25,9 +23,8 @@ const socket = (server: http.Server) => {
     const token = socket.handshake.auth.token;
 
     // current user details
-    const decoded = await frontUserUtils.decodeToken(token);
-    const user = await getUser(decoded);
-    const userId = user._id.toString();
+    const user = await frontUserUtils.decodeToken(token);
+    const userId = user.id.toString();
 
     // create a room
     socket.join(userId);
@@ -53,8 +50,8 @@ const socket = (server: http.Server) => {
       //get previous message
       const getConversationMessage = await ConversationModel.findOne({
         $or: [
-          { sender: user?._id, receiver: userId },
-          { sender: userId, receiver: user?._id },
+          { sender: user?.id, receiver: userId },
+          { sender: userId, receiver: user?.id },
         ],
       })
         .populate("messages")
@@ -141,7 +138,7 @@ const socket = (server: http.Server) => {
       await MessageModel.updateMany({ _id: { $in: conversationMessageId }, sender: senderId }, { $set: { seen: true } });
 
       //send conversation
-      const conversationSender = await getConversation(user?._id?.toString());
+      const conversationSender = await getConversation(user?.id?.toString());
       const conversationReceiver = await getConversation(senderId);
 
       io.to(userId).emit("conversation", conversationSender);

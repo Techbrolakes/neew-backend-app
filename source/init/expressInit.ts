@@ -1,6 +1,8 @@
 import cors from "cors";
 import express, { Express } from "express";
 import morgan from "morgan";
+import session from "express-session";
+import passport from "../core/passport.core";
 
 import route from "../routes/route";
 

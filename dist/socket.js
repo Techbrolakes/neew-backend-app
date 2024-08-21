@@ -7,7 +7,6 @@ const socket_io_1 = require("socket.io");
 const message_model_1 = require("./models/message.model");
 const conversation_model_1 = require("./models/conversation.model");
 const frontUser_utils_1 = __importDefault(require("./utils/frontUser.utils"));
-const auth_mw_1 = require("./middleware/auth.mw");
 const config_1 = __importDefault(require("./utils/config"));
 const conversation_core_1 = require("./core/conversation.core");
 const user_model_1 = require("./models/user.model");
@@ -23,9 +22,8 @@ const socket = (server) => {
         console.log("connect User ", socket.id);
         const token = socket.handshake.auth.token;
         // current user details
-        const decoded = await frontUser_utils_1.default.decodeToken(token);
-        const user = await (0, auth_mw_1.getUser)(decoded);
-        const userId = user._id.toString();
+        const user = await frontUser_utils_1.default.decodeToken(token);
+        const userId = user.id.toString();
         // create a room
         socket.join(userId);
         onlineUser.add(userId);
@@ -45,8 +43,8 @@ const socket = (server) => {
             //get previous message
             const getConversationMessage = await conversation_model_1.ConversationModel.findOne({
                 $or: [
-                    { sender: user?._id, receiver: userId },
-                    { sender: userId, receiver: user?._id },
+                    { sender: user?.id, receiver: userId },
+                    { sender: userId, receiver: user?.id },
                 ],
             })
                 .populate("messages")
@@ -113,7 +111,7 @@ const socket = (server) => {
             const conversationMessageId = conversation?.messages || [];
             await message_model_1.MessageModel.updateMany({ _id: { $in: conversationMessageId }, sender: senderId }, { $set: { seen: true } });
             //send conversation
-            const conversationSender = await (0, conversation_core_1.getConversation)(user?._id?.toString());
+            const conversationSender = await (0, conversation_core_1.getConversation)(user?.id?.toString());
             const conversationReceiver = await (0, conversation_core_1.getConversation)(senderId);
             io.to(userId).emit("conversation", conversationSender);
             io.to(senderId).emit("conversation", conversationReceiver);

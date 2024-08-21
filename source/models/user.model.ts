@@ -92,11 +92,12 @@ const UserSchema = new mongoose.Schema(
     },
     provider_id: {
       type: String,
-      required: true,
     },
   },
   { timestamps: true },
 );
+
+UserSchema.index({ email: 1 });
 
 // A document type combining IUser and Document interfaces
 export interface IUserDocument extends mongoose.Document, IUser {}

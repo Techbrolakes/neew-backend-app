@@ -59,9 +59,9 @@ const UserSchema = new mongoose_1.default.Schema({
     },
     provider_id: {
         type: String,
-        required: true,
     },
 }, { timestamps: true });
+UserSchema.index({ email: 1 });
 // A model type extending the mongoose Model interface
 exports.UserModel = mongoose_1.default.model("User", UserSchema);
 //# sourceMappingURL=user.model.js.map

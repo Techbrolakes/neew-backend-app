@@ -4,4 +4,8 @@ export default interface Config {
   databaseName: string;
   frontUrl: string;
   imageFolder: string;
+  googleSecretkey: string;
+  googleClientId: string;
+  googleBackendRedirectUri: string;
+  googleFrontendRedirectUri: string;
 }

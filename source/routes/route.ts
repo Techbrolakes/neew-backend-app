@@ -16,6 +16,7 @@ router.post("/auth/register", authService.register);
 router.post("/auth/reset-password", authService.resetPassword);
 router.post("/auth/check-email", authService.checkEmail);
 
+
 router.put("/post/edit", postService.edit);
 router.get("/post/:postId", postService.get);
 router.post("/post/create", postService.create);

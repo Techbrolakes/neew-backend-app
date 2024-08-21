@@ -12,7 +12,68 @@ const appDefaults_constant_1 = require("../constants/appDefaults.constant");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const utils_1 = require("../utils");
 const user_model_1 = require("../models/user.model");
+const google_auth_library_1 = require("google-auth-library");
 const debug = (0, debug_1.default)("project:user.service");
+const secretKey = "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";
+const clientId = "354745730971-7m8stefuln9oa2ldlqscv2s9jrc766rf.apps.googleusercontent.com";
+const oauth2Client = new google_auth_library_1.OAuth2Client(clientId, secretKey, "http://localhost:9001/api/auth/google/callback");
+const generateGoogleAuthUrl = [
+    async (req, res) => {
+        try {
+            const url = oauth2Client.generateAuthUrl({
+                access_type: "offline",
+                scope: ["profile", "email"],
+                prompt: "select_account",
+            });
+            return response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.OK,
+                message: "Success",
+                data: { authorizationUrl: url },
+            });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
+                error: `${error}`,
+            });
+        }
+    },
+];
+const googleCallback = [
+    async (req, res) => {
+        try {
+            const code = req.query.code;
+            // Exchange the authorization code for tokens
+            const { tokens } = await oauth2Client.getToken(code);
+            const accessToken = tokens.access_token;
+            // Fetch user details from Google’s user info endpoint
+            // Fetch user details from Google’s user info endpoint using Fetch API
+            const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            if (!userInfoResponse.ok) {
+                throw new Error(`Failed to fetch user info: ${userInfoResponse.statusText}`);
+            }
+            const user = await userInfoResponse.json();
+            console.log("user", user);
+            console.log("tokens", tokens);
+            console.log("tokens", tokens);
+            res.redirect(`http://localhost:3000?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`);
+            res.json({ message: "Google callback", tokens });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
+                error: `${error}`,
+            });
+        }
+    },
+];
 const login = [
     (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email"),
     (0, express_validator_1.body)("password").isString().exists().withMessage("Invalid password"),
@@ -184,5 +245,7 @@ exports.default = {
     login,
     resetPassword,
     checkEmail,
+    generateGoogleAuthUrl,
+    googleCallback,
 };
 //# sourceMappingURL=auth.service.js.map
