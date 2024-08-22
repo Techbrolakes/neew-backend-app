@@ -63,7 +63,7 @@ app.get("/auth/google/callback", async (req, res) => {
             firstName: existingUser.firstName,
             lastName: existingUser.lastName,
             photo: existingUser.photo,
-            isCompleteProfile: existingUser?.interest?.length > 0 && existingUser.location ? true : false,
+            isCompleteProfile: existingUser?.interest?.length > 0 && existingUser?.location ? true : false,
             createdAt: existingUser.createdAt,
         };
         token = await (0, utils_1.generateToken)({
@@ -99,7 +99,7 @@ app.get("/auth/google/callback", async (req, res) => {
     }
     // Redirect to frontend with tokens and user details
     // res.redirect(`${config.frontUrl}/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
-    res.redirect(`http://localhost:3000/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
+    res.redirect(`https://neew-app.vercel.app/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
 });
 async function start() {
     await dbInit_1.default.connect();
