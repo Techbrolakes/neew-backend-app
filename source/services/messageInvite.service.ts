@@ -10,6 +10,7 @@ import { MessageInviteModel } from "../models/message-invites.model";
 import { throwIfUndefined } from "../utils";
 import { Types } from "mongoose";
 import { ConversationModel } from "../models/conversation.model";
+import { UserModel } from "../models/user.model";
 
 const debug = Debug("project:messageInvite.service");
 
@@ -80,6 +81,8 @@ const put = [
     try {
       const user = throwIfUndefined(req.user, "req.user");
 
+      const currentUser = await UserModel.findById(user.id);
+
       const messageInvite = await MessageInviteModel.findById(req.data.inviteId);
 
       if (!messageInvite) {
@@ -99,11 +102,11 @@ const put = [
             sender: messageInvite.sender,
           }),
 
-          // NotificationModel.create({
-          //   message: "Your message invite has been accepted",
-          //   notificationType: "message-invite",
-          //   userId: messageInvite.sender,
-          // }),
+          NotificationModel.create({
+            message: `${currentUser.firstName} ${currentUser.lastName} accepted your connect request`,
+            notificationType: "message-invite",
+            userId: messageInvite.sender,
+          }),
         ]);
 
         return ResponseHandler.sendSuccessResponse({
@@ -117,11 +120,11 @@ const put = [
         await Promise.all([
           MessageInviteModel.findOneAndUpdate({ _id: req.data.inviteId }, { inviteStatus: "rejected" }),
 
-          // NotificationModel.create({
-          //   message: "Your message invite has been rejected",
-          //   notificationType: "message-invite",
-          //   userId: messageInvite.sender,
-          // }),
+          NotificationModel.create({
+            message: `${currentUser.firstName} ${currentUser.lastName} rejected your connect request`,
+            notificationType: "message-invite",
+            userId: messageInvite.sender,
+          }),
         ]);
 
         return ResponseHandler.sendSuccessResponse({
@@ -154,8 +157,20 @@ const create = [
     try {
       const user = throwIfUndefined(req.user, "req.user");
 
+      const receiverDetails = await UserModel.findById(req.body.receiver);
+
+      if (!receiverDetails) {
+        return ResponseHandler.sendErrorResponse({
+          res,
+          code: HTTP_CODES.NOT_FOUND,
+          error: "Receiver not found",
+        });
+      }
+
+      debug("receiverDetails", receiverDetails);
+
       const existingMessageInvite = await MessageInviteModel.findOne({
-        receiver: req.data.receiver,
+        receiver: req.body.receiver,
         sender: new Types.ObjectId(user.id),
       });
 
@@ -168,14 +183,20 @@ const create = [
       }
 
       const newMessageInvite = await MessageInviteModel.create({
-        receiver: req.data.receiver,
+        receiver: req.body.receiver,
         sender: new Types.ObjectId(user.id),
       });
 
       await NotificationModel.create({
-        message: "You have a new message invite",
+        message: `You sent a connect request to ${receiverDetails.firstName} ${receiverDetails.lastName} once they accept you can start chatting`,
+        notificationType: "sent-invite",
+        userId: user.id,
+      });
+
+      await NotificationModel.create({
+        message: "You have a new connect request",
         notificationType: "message-invite",
-        userId: req.data.receiver,
+        userId: req.body.receiver,
       });
 
       return ResponseHandler.sendSuccessResponse({

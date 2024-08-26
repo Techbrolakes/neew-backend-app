@@ -60,7 +60,7 @@ const socket = (server: http.Server) => {
       socket.emit("message", getConversationMessage?.messages || []);
     });
 
-    // Send message
+    // Updated code for 'new message' event handler
     socket.on("new message", async (data) => {
       let conversation = await ConversationModel.findOne({
         $or: [
@@ -69,7 +69,7 @@ const socket = (server: http.Server) => {
         ],
       });
 
-      //if conversation is not available
+      // If conversation is not available
       if (!conversation) {
         await ConversationModel.create({
           sender: data.sender,
@@ -106,10 +106,24 @@ const socket = (server: http.Server) => {
 
       console.log("getConversationMessage", getConversationMessage);
 
-      io.to(data?.sender).emit("message", getConversationMessage?.messages || []);
-      io.to(data?.receiver).emit("message", getConversationMessage?.messages || []);
+      // Emit the new message to both sender and receiver
+      io.to(data?.sender).emit("new message", newMessage);
+      io.to(data?.receiver).emit("new message", newMessage);
 
-      //send conversation
+      // Update unseen messages count for the sender and receiver
+      const unseenMessagesCountSender = await MessageModel.countDocuments({
+        receiver: data?.sender,
+        seen: false,
+      });
+      const unseenMessagesCountReceiver = await MessageModel.countDocuments({
+        receiver: data?.receiver,
+        seen: false,
+      });
+
+      io.to(data?.sender).emit("unseen message count", unseenMessagesCountSender);
+      io.to(data?.receiver).emit("unseen message count", unseenMessagesCountReceiver);
+
+      // Send conversation updates (optional, if necessary for sidebar updates)
       const conversationSender = await getConversation(data?.sender);
       const conversationReceiver = await getConversation(data?.receiver);
 
@@ -124,23 +138,99 @@ const socket = (server: http.Server) => {
       socket.emit("conversation", conversation);
     });
 
+    // Delete message
+    socket.on("delete message", async (data) => {
+      try {
+        const { messageId, conversationId, userId, otherUserId } = data;
+
+        // Delete the message from the database
+        await MessageModel.findByIdAndDelete(messageId);
+
+        // Remove the message from the conversation
+        await ConversationModel.findByIdAndUpdate(conversationId, {
+          $pull: { messages: messageId },
+        });
+
+        // Get the updated conversation, populating the messages and sorting them by the latest
+        const updatedConversation = await ConversationModel.findById(conversationId).populate("messages").sort({ updatedAt: -1 });
+
+        // Emit the updated message list to both the sender and receiver
+        io.to(userId).emit("message deleted", {
+          conversationId,
+          messages: updatedConversation?.messages || [],
+        });
+        io.to(otherUserId).emit("message deleted", {
+          conversationId,
+          messages: updatedConversation?.messages || [],
+        });
+
+        // Update and emit the conversation list for both users
+        const conversationSender = await getConversation(userId);
+        const conversationReceiver = await getConversation(otherUserId);
+
+        io.to(userId).emit("conversation updated", conversationSender);
+        io.to(otherUserId).emit("conversation updated", conversationReceiver);
+      } catch (error) {
+        console.error("Error deleting message:", error);
+      }
+    });
+
+    // Edit message
+    socket.on("edit message", async (data) => {
+      try {
+        const { messageId, newText, conversationId, userId, otherUserId } = data;
+
+        // Update the message text in the database
+        await MessageModel.findByIdAndUpdate(messageId, { text: newText }, { new: true });
+
+        // Get the updated conversation, populating the messages and sorting them by the latest
+        const updatedConversation = await ConversationModel.findById(conversationId).populate("messages").sort({ updatedAt: -1 });
+
+        // Emit the updated message list to both the sender and receiver
+        io.to(userId).emit("message edited", {
+          conversationId,
+          messages: updatedConversation?.messages || [],
+        });
+        io.to(otherUserId).emit("message edited", {
+          conversationId,
+          messages: updatedConversation?.messages || [],
+        });
+
+        // Update and emit the conversation list for both users
+        const conversationSender = await getConversation(userId);
+        const conversationReceiver = await getConversation(otherUserId);
+
+        io.to(userId).emit("conversation updated", conversationSender);
+        io.to(otherUserId).emit("conversation updated", conversationReceiver);
+      } catch (error) {
+        console.error("Error editing message:", error);
+      }
+    });
+
     // seen message
-    socket.on("seen", async (senderId) => {
-      let conversation = await ConversationModel.findOne({
-        $or: [
-          { sender: userId, receiver: senderId },
-          { sender: senderId, receiver: userId },
-        ],
-      });
+    socket.on("seen", async (data) => {
+      const { conversationId, senderId } = data;
 
-      const conversationMessageId = conversation?.messages || [];
+      // Find the conversation by ID
+      const conversation = await ConversationModel.findById(conversationId);
 
-      await MessageModel.updateMany({ _id: { $in: conversationMessageId }, sender: senderId }, { $set: { seen: true } });
+      if (!conversation) {
+        console.error("Conversation not found");
+        return;
+      }
 
-      //send conversation
-      const conversationSender = await getConversation(user?.id?.toString());
+      // Update only the messages sent by the other user in this conversation
+      const conversationMessageIds = conversation.messages || [];
+      await MessageModel.updateMany(
+        { _id: { $in: conversationMessageIds }, sender: senderId, seen: false },
+        { $set: { seen: true } },
+      );
+
+      // Get updated conversation lists
+      const conversationSender = await getConversation(userId);
       const conversationReceiver = await getConversation(senderId);
 
+      // Emit the updated conversation list to both the current user and the other user
       io.to(userId).emit("conversation", conversationSender);
       io.to(senderId).emit("conversation", conversationReceiver);
     });

@@ -90,6 +90,14 @@ const login = [
     try {
       const user = await UserCore.getByEmail(req.body.email);
 
+      if (!user?.password) {
+        return ResponseHandler.sendErrorResponse({
+          res,
+          code: HTTP_CODES.NOT_FOUND,
+          error: "User registered with Google. Please login with Google",
+        });
+      }
+
       if (!user) {
         return ResponseHandler.sendErrorResponse({
           res,

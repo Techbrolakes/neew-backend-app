@@ -3,7 +3,7 @@ import mongoose, { Schema } from "mongoose";
 export interface INotification {
   userId: string;
   message: string;
-  notificationType: "like" | "comment" | "follow" | "message-invite" | "message" | "mentions";
+  notificationType: "like" | "comment" | "follow" | "message-invite" | "message" | "mentions" | "sent-invite";
   read: string;
   postId?: string;
 }

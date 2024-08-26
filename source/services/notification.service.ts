@@ -85,7 +85,7 @@ const getNotifications = [
     try {
       throwIfUndefined(req.user, "req.user");
 
-      const notifications = await NotificationModel.find();
+      const notifications = await NotificationModel.find().sort({ createdAt: -1 });
 
       return ResponseHandler.sendSuccessResponse({
         res,

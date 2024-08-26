@@ -81,6 +81,13 @@ const login = [
     async (req, res) => {
         try {
             const user = await user_core_1.default.getByEmail(req.body.email);
+            if (!user?.password) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
+                    error: "User registered with Google. Please login with Google",
+                });
+            }
             if (!user) {
                 return response_handler_1.default.sendErrorResponse({
                     res,

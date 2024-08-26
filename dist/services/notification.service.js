@@ -78,7 +78,7 @@ const getNotifications = [
     async (req, res) => {
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const notifications = await notification_model_1.NotificationModel.find();
+            const notifications = await notification_model_1.NotificationModel.find().sort({ createdAt: -1 });
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 message: "Notifications fetched",
