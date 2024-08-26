@@ -53,58 +53,58 @@ const socket = (server) => {
         });
         // Updated code for 'new message' event handler
         socket.on("new message", async (data) => {
-            let conversation = await conversation_model_1.ConversationModel.findOne({
-                $or: [
-                    { sender: data?.sender, receiver: data?.receiver },
-                    { sender: data?.receiver, receiver: data?.sender },
-                ],
-            });
-            // If conversation is not available
-            if (!conversation) {
-                await conversation_model_1.ConversationModel.create({
-                    sender: data.sender,
-                    receiver: data.receiver,
+            try {
+                // Find or create the conversation
+                let conversation = await conversation_model_1.ConversationModel.findOne({
+                    $or: [
+                        { sender: data.sender, receiver: data.receiver },
+                        { sender: data.receiver, receiver: data.sender },
+                    ],
                 });
+                if (!conversation) {
+                    conversation = await conversation_model_1.ConversationModel.create({
+                        sender: data.sender,
+                        receiver: data.receiver,
+                        messages: [],
+                    });
+                }
+                // Create and save the new message
+                const newMessage = await message_model_1.MessageModel.create({
+                    text: data.text,
+                    imageUrl: data.imageUrl,
+                    videoUrl: data.videoUrl,
+                    sender: data.sender,
+                });
+                // Add the new message to the conversation
+                conversation.messages.push(newMessage._id);
+                await conversation.save();
+                // Populate the conversation with the updated messages
+                const populatedConversation = await conversation_model_1.ConversationModel.findById(conversation._id)
+                    .populate("messages")
+                    .sort({ updatedAt: -1 });
+                // Emit the updated messages list to both sender and receiver
+                io.to(data.sender).emit("message", populatedConversation.messages);
+                io.to(data.receiver).emit("message", populatedConversation.messages);
+                // Update unseen messages count for the sender and receiver
+                const unseenMessagesCountSender = await message_model_1.MessageModel.countDocuments({
+                    receiver: data.sender,
+                    seen: false,
+                });
+                const unseenMessagesCountReceiver = await message_model_1.MessageModel.countDocuments({
+                    receiver: data.receiver,
+                    seen: false,
+                });
+                io.to(data.sender).emit("unseen message count", unseenMessagesCountSender);
+                io.to(data.receiver).emit("unseen message count", unseenMessagesCountReceiver);
+                // Send conversation updates (optional, if necessary for sidebar updates)
+                const conversationSender = await (0, conversation_core_1.getConversation)(data.sender);
+                const conversationReceiver = await (0, conversation_core_1.getConversation)(data.receiver);
+                io.to(data.sender).emit("conversation", conversationSender);
+                io.to(data.receiver).emit("conversation", conversationReceiver);
             }
-            const newMessage = await message_model_1.MessageModel.create({
-                text: data.text,
-                imageUrl: data.imageUrl,
-                videoUrl: data.videoUrl,
-                sender: userId,
-            });
-            await conversation_model_1.ConversationModel.findOneAndUpdate({
-                $or: [
-                    { sender: data?.sender, receiver: data?.receiver },
-                    { sender: data?.receiver, receiver: data?.sender },
-                ],
-            }, { $push: { messages: newMessage._id } }, { new: true });
-            const getConversationMessage = await conversation_model_1.ConversationModel.findOne({
-                $or: [
-                    { sender: data?.sender, receiver: data?.receiver },
-                    { sender: data?.receiver, receiver: data?.sender },
-                ],
-            })
-                .populate("messages")
-                .sort({ updatedAt: -1 });
-            // Emit the new message to both sender and receiver
-            io.to(data?.sender).emit("new message", newMessage);
-            io.to(data?.receiver).emit("new message", newMessage);
-            // Update unseen messages count for the sender and receiver
-            const unseenMessagesCountSender = await message_model_1.MessageModel.countDocuments({
-                receiver: data?.sender,
-                seen: false,
-            });
-            const unseenMessagesCountReceiver = await message_model_1.MessageModel.countDocuments({
-                receiver: data?.receiver,
-                seen: false,
-            });
-            io.to(data?.sender).emit("unseen message count", unseenMessagesCountSender);
-            io.to(data?.receiver).emit("unseen message count", unseenMessagesCountReceiver);
-            // Send conversation updates (optional, if necessary for sidebar updates)
-            const conversationSender = await (0, conversation_core_1.getConversation)(data?.sender);
-            const conversationReceiver = await (0, conversation_core_1.getConversation)(data?.receiver);
-            io.to(data?.sender).emit("conversation", conversationSender);
-            io.to(data?.receiver).emit("conversation", conversationReceiver);
+            catch (error) {
+                console.error("Error sending message:", error);
+            }
         });
         //sidebar
         socket.on("sidebar", async (currentUserId) => {

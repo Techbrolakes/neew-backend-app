@@ -62,72 +62,67 @@ const socket = (server: http.Server) => {
 
     // Updated code for 'new message' event handler
     socket.on("new message", async (data) => {
-      let conversation = await ConversationModel.findOne({
-        $or: [
-          { sender: data?.sender, receiver: data?.receiver },
-          { sender: data?.receiver, receiver: data?.sender },
-        ],
-      });
-
-      // If conversation is not available
-      if (!conversation) {
-        await ConversationModel.create({
-          sender: data.sender,
-          receiver: data.receiver,
-        });
-      }
-
-      const newMessage = await MessageModel.create({
-        text: data.text,
-        imageUrl: data.imageUrl,
-        videoUrl: data.videoUrl,
-        sender: userId,
-      });
-
-      await ConversationModel.findOneAndUpdate(
-        {
+      try {
+        // Find or create the conversation
+        let conversation = await ConversationModel.findOne({
           $or: [
-            { sender: data?.sender, receiver: data?.receiver },
-            { sender: data?.receiver, receiver: data?.sender },
+            { sender: data.sender, receiver: data.receiver },
+            { sender: data.receiver, receiver: data.sender },
           ],
-        },
-        { $push: { messages: newMessage._id } },
-        { new: true },
-      );
+        });
 
-      const getConversationMessage = await ConversationModel.findOne({
-        $or: [
-          { sender: data?.sender, receiver: data?.receiver },
-          { sender: data?.receiver, receiver: data?.sender },
-        ],
-      })
-        .populate("messages")
-        .sort({ updatedAt: -1 });
+        if (!conversation) {
+          conversation = await ConversationModel.create({
+            sender: data.sender,
+            receiver: data.receiver,
+            messages: [],
+          });
+        }
 
-      // Emit the new message to both sender and receiver
-      io.to(data?.sender).emit("new message", newMessage);
-      io.to(data?.receiver).emit("new message", newMessage);
+        // Create and save the new message
+        const newMessage = await MessageModel.create({
+          text: data.text,
+          imageUrl: data.imageUrl,
+          videoUrl: data.videoUrl,
+          sender: data.sender,
+        });
 
-      // Update unseen messages count for the sender and receiver
-      const unseenMessagesCountSender = await MessageModel.countDocuments({
-        receiver: data?.sender,
-        seen: false,
-      });
+        // Add the new message to the conversation
+        conversation.messages.push(newMessage._id);
+        await conversation.save();
 
-      const unseenMessagesCountReceiver = await MessageModel.countDocuments({
-        receiver: data?.receiver,
-        seen: false,
-      });
+        // Populate the conversation with the updated messages
+        const populatedConversation = await ConversationModel.findById(conversation._id)
+          .populate("messages")
+          .sort({ updatedAt: -1 });
 
-      io.to(data?.sender).emit("unseen message count", unseenMessagesCountSender);
-      io.to(data?.receiver).emit("unseen message count", unseenMessagesCountReceiver);
+        // Emit the updated messages list to both sender and receiver
+        io.to(data.sender).emit("message", populatedConversation.messages);
+        io.to(data.receiver).emit("message", populatedConversation.messages);
 
-      // Send conversation updates (optional, if necessary for sidebar updates)
-      const conversationSender = await getConversation(data?.sender);
-      const conversationReceiver = await getConversation(data?.receiver);
+        // Update unseen messages count for the sender and receiver
+        const unseenMessagesCountSender = await MessageModel.countDocuments({
+          receiver: data.sender,
+          seen: false,
+        });
 
-      io.to(data?.sender).emit("conversation", conversationSender);
-      io.to(data?.receiver).emit("conversation", conversationReceiver);
+        const unseenMessagesCountReceiver = await MessageModel.countDocuments({
+          receiver: data.receiver,
+          seen: false,
+        });
+
+        io.to(data.sender).emit("unseen message count", unseenMessagesCountSender);
+        io.to(data.receiver).emit("unseen message count", unseenMessagesCountReceiver);
+
+        // Send conversation updates (optional, if necessary for sidebar updates)
+        const conversationSender = await getConversation(data.sender);
+        const conversationReceiver = await getConversation(data.receiver);
+
+        io.to(data.sender).emit("conversation", conversationSender);
+        io.to(data.receiver).emit("conversation", conversationReceiver);
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     });
 
     //sidebar
