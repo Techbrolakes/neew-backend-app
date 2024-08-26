@@ -149,6 +149,7 @@ const register = [
                 email: req.body.email,
                 firstName: req.body.firstName,
                 interest: req.body.interest,
+                industry: req.body.industry,
                 lastName: req.body.lastName,
                 location: req.body.location,
                 password: req.body.password,

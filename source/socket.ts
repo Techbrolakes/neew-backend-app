@@ -104,8 +104,6 @@ const socket = (server: http.Server) => {
         .populate("messages")
         .sort({ updatedAt: -1 });
 
-      console.log("getConversationMessage", getConversationMessage);
-
       // Emit the new message to both sender and receiver
       io.to(data?.sender).emit("new message", newMessage);
       io.to(data?.receiver).emit("new message", newMessage);
@@ -115,6 +113,7 @@ const socket = (server: http.Server) => {
         receiver: data?.sender,
         seen: false,
       });
+
       const unseenMessagesCountReceiver = await MessageModel.countDocuments({
         receiver: data?.receiver,
         seen: false,
