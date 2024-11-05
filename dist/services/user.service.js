@@ -57,7 +57,7 @@ const getAllUsers = [
     async (req, res) => {
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            const { page = 1, perpage = 10, locations, industries, interests, search } = req.query;
+            const { page = 1, perpage = 200, locations, industries, interests, search } = req.query;
             const filter = {};
             if (locations) {
                 const locationsArray = locations.split(",").map((location) => location.trim());

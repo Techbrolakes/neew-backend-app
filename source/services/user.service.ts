@@ -61,7 +61,7 @@ const getAllUsers = [
     try {
       throwIfUndefined(req.user, "req.user");
 
-      const { page = 1, perpage = 10, locations, industries, interests, search } = req.query as any;
+      const { page = 1, perpage = 200, locations, industries, interests, search } = req.query as any;
 
       const filter: any = {};
 
