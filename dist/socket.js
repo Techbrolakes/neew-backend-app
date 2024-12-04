@@ -7,14 +7,15 @@ const socket_io_1 = require("socket.io");
 const message_model_1 = require("./models/message.model");
 const conversation_model_1 = require("./models/conversation.model");
 const frontUser_utils_1 = __importDefault(require("./utils/frontUser.utils"));
-const config_1 = __importDefault(require("./utils/config"));
 const conversation_core_1 = require("./core/conversation.core");
 const user_model_1 = require("./models/user.model");
 const socket = (server) => {
     const io = new socket_io_1.Server(server, {
         cors: {
-            origin: config_1.default.frontUrl,
-            credentials: true,
+            // origin: config.frontUrl,
+            // credentials: true,
+            origin: "*",
+            methods: ["GET", "POST"],
         },
     });
     const onlineUser = new Set();
