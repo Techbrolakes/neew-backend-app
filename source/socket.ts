@@ -10,8 +10,10 @@ import { UserModel } from "./models/user.model";
 const socket = (server: http.Server) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: config.frontUrl,
-      credentials: true,
+      // origin: config.frontUrl,
+      // credentials: true,
+      origin: "*",
+      methods: ["GET", "POST"],
     },
   });
 

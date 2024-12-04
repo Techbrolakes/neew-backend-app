@@ -9,7 +9,7 @@
     "watch-dev": "concurrently \"tsc -w\" \"cross-env NODE_ENV=development DEBUG=project:* TZ=UTC nodemon ./dist/app.js\"",
     "watch-test": "concurrently \"tsc -w\" \"cross-env NODE_ENV=test DEBUG=project:* TZ=UTC nodemon ./dist/app.js\"",
     "watch-node": "cross-env DEBUG=project:* TZ=UTC nodemon ./dist/app.js",
-    "test:watch": "xtsc && cross-env NODE_ENV=test DEBUG=project:* TZ=UTC mocha dist/test/*.js --timeout 80000 --exit --bail",
+    "test:watch": "tsc && cross-env NODE_ENV=test DEBUG=project:* TZ=UTC mocha dist/test/*.js --timeout 80000 --exit --bail",
     "lint": "eslint source/**",
     "build": "rm -rf ./build-dist/* && tsc --outdir build-dist/build && cp package.json build-dist/package.json && cp yarn.lock build-dist/yarn.lock && cp Dockerfile build-dist/Dockerfile"
   },
