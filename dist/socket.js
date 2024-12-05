@@ -12,7 +12,7 @@ const user_model_1 = require("./models/user.model");
 const socket = (server) => {
     const io = new socket_io_1.Server(server, {
         cors: {
-            origin: ["https://neew.io/", "http://localhost:3000"],
+            origin: "*",
             credentials: true,
         },
     });

@@ -10,7 +10,7 @@ import { UserModel } from "./models/user.model";
 const socket = (server: http.Server) => {
   const io = new SocketIOServer(server, {
     cors: {
-      origin: ["https://neew.io/", "http://localhost:3000"],
+      origin: "*",
       credentials: true,
     },
   });
