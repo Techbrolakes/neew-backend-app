@@ -105,12 +105,7 @@ app.get("/auth/google/callback", async (req, res) => {
       lastName: newUser.lastName,
     });
   }
-  // Redirect to frontend with tokens and user details
-  // res.redirect(`${config.frontUrl}/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
-
-  res.redirect(
-    `https://neew-app.vercel.app/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`,
-  );
+  res.redirect(`https://neew.io/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
 });
 
 async function start() {
