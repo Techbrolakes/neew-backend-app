@@ -24,7 +24,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cors());
 
-const oauth2Client = new OAuth2Client(config.googleClientId, config.googleSecretkey, config.googleBackendRedirectUri);
+const oauth2Client = new OAuth2Client(config.googleClientId, config.googleKey, config.googleBackendRedirectUri);
 
 app.get("/auth/google", (req, res) => {
   const url = oauth2Client.generateAuthUrl({

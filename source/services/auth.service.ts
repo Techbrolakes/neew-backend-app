@@ -12,8 +12,8 @@ import { OAuth2Client } from "google-auth-library";
 
 const debug = Debug("project:user.service");
 
-const secretKey = "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";
-const clientId = "354745730971-7m8stefuln9oa2ldlqscv2s9jrc766rf.apps.googleusercontent.com";
+const secretKey = "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";
+const clientId = "617862799460-erkfh2qvd432t4j1p0uqifpgc3pbmpe1.apps.googleusercontent.com";
 const oauth2Client = new OAuth2Client(clientId, secretKey, "http://localhost:9001/api/auth/google/callback");
 
 const generateGoogleAuthUrl = [

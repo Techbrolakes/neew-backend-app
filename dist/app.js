@@ -26,7 +26,7 @@ app.use((0, express_session_1.default)({ secret: "neew-server", resave: false, s
 app.use(passport_core_1.default.initialize());
 app.use(passport_core_1.default.session());
 app.use((0, cors_1.default)());
-const oauth2Client = new google_auth_library_1.OAuth2Client(config_1.default.googleClientId, config_1.default.googleSecretkey, config_1.default.googleBackendRedirectUri);
+const oauth2Client = new google_auth_library_1.OAuth2Client(config_1.default.googleClientId, config_1.default.googleKey, config_1.default.googleBackendRedirectUri);
 app.get("/auth/google", (req, res) => {
     const url = oauth2Client.generateAuthUrl({
         access_type: "offline",
