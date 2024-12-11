@@ -358,7 +358,6 @@ const userPosts = [
     async (req, res) => {
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
-            console.log(req.data.userId);
             const posts = await post_core_1.default.find(req, req.data.userId);
             return response_handler_1.default.sendSuccessResponse({
                 res,

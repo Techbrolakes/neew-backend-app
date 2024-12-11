@@ -398,8 +398,6 @@ const userPosts = [
     try {
       throwIfUndefined(req.user, "req.user");
 
-      console.log(req.data.userId);
-
       const posts = await PostCore.find(req, req.data.userId);
 
       return ResponseHandler.sendSuccessResponse({

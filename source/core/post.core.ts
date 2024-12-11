@@ -128,7 +128,7 @@ async function getPostById(postId: Types.ObjectId): Promise<IPostDocument | null
 
 async function getAllPosts(req: express.Request): Promise<IPostDocument[] | null | any> {
   const { query } = req;
-  const perpage = Number(query.perpage) || 10;
+  const perpage = Number(query.perpage) || 200;
   const page = Number(query.page) || 1;
 
   const [posts, total] = await Promise.all([

@@ -84,7 +84,7 @@ async function getPostById(postId) {
 }
 async function getAllPosts(req) {
     const { query } = req;
-    const perpage = Number(query.perpage) || 10;
+    const perpage = Number(query.perpage) || 200;
     const page = Number(query.page) || 1;
     const [posts, total] = await Promise.all([
         post_model_1.PostModel.find()
