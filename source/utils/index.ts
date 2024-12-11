@@ -15,14 +15,14 @@ export function throwIfUndefined<T>(x: T | undefined, name?: string): T {
 export async function generateToken(data: any) {
   return new Promise((resolve, _reject) => {
     const signOptions: any = {};
-    signOptions.expiresIn = "365d";
+    signOptions.expiresIn = 30 * 60;
 
     jwt.sign(data, "neew.@#KSJ1a@js", signOptions, (err: any, token: any) => {
       if (err) {
         debug(err.message);
       }
 
-    resolve(token);
+      resolve(token);
     });
   });
 }

@@ -19,7 +19,7 @@ exports.throwIfUndefined = throwIfUndefined;
 async function generateToken(data) {
     return new Promise((resolve, _reject) => {
         const signOptions = {};
-        signOptions.expiresIn = "365d";
+        signOptions.expiresIn = 30 * 60;
         jsonwebtoken_1.default.sign(data, "neew.@#KSJ1a@js", signOptions, (err, token) => {
             if (err) {
                 (0, debug_1.default)(err.message);
