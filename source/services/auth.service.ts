@@ -90,7 +90,7 @@ const login = [
     try {
       const user = await UserCore.getByEmail(req.body.email);
 
-      if (!user?.password) {
+      if (!user?.password && user?.provider === AuthProvider.google) {
         return ResponseHandler.sendErrorResponse({
           res,
           code: HTTP_CODES.NOT_FOUND,

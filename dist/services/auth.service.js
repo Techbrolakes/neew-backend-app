@@ -81,7 +81,7 @@ const login = [
     async (req, res) => {
         try {
             const user = await user_core_1.default.getByEmail(req.body.email);
-            if (!user?.password) {
+            if (!user?.password && user?.provider === user_model_1.AuthProvider.google) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
                     code: appDefaults_constant_1.HTTP_CODES.NOT_FOUND,
