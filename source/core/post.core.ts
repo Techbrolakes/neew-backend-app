@@ -5,6 +5,7 @@ import { IPostDocument } from "../models/post.model";
 import { FilterQuery, Types } from "mongoose";
 import express from "express";
 import { paginationUtil } from "../utils";
+import redis from "../init/redisInit";
 
 // Function to get post likes by post ID
 async function getLikesUsers(postId: Types.ObjectId): Promise<IPostDocument | any | null> {
@@ -126,29 +127,52 @@ async function getPostById(postId: Types.ObjectId): Promise<IPostDocument | null
     .lean();
 }
 
-async function getAllPosts(req: express.Request): Promise<IPostDocument[] | null | any> {
+async function getAllPosts(req: express.Request): Promise<any> {
   const { query } = req;
   const perpage = Number(query.perpage) || 200;
   const page = Number(query.page) || 1;
 
-  const [posts, total] = await Promise.all([
-    PostModel.find()
-      .sort({ createdAt: -1 })
-      .populate("creator", "firstName lastName photo persona")
-      .populate("mentions", "firstName lastName")
-      .limit(perpage)
-      .skip(page * perpage - perpage)
-      .lean(),
+  // Generate a unique cache key based on pagination
+  const cacheKey = `allPosts:page:${page}:perpage:${perpage}`;
 
-    PostModel.countDocuments(),
-  ]);
+  try {
+    // Step 1: Check Redis Cache
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      console.log("Cache hit!");
+      return JSON.parse(cachedData);
+    }
 
-  const pagination = await paginationUtil({ total, page, perpage });
+    console.log("Cache miss! Fetching from database...");
 
-  return {
-    data: posts,
-    pagination,
-  };
+    // Step 2: Fetch data from MongoDB
+    const [posts, total] = await Promise.all([
+      PostModel.find()
+        .sort({ createdAt: -1 })
+        .populate("creator", "firstName lastName photo persona")
+        .populate("mentions", "firstName lastName")
+        .limit(perpage)
+        .skip(page * perpage - perpage)
+        .lean(),
+
+      PostModel.countDocuments(),
+    ]);
+
+    const pagination = await paginationUtil({ total, page, perpage });
+
+    const result = {
+      data: posts,
+      pagination,
+    };
+
+    // Step 3: Cache the result in Redis
+    await redis.setex(cacheKey, 3600, JSON.stringify(result)); // Cache for 1 hour
+
+    return result;
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    throw new Error("Unable to fetch posts");
+  }
 }
 
 // Function that lists all user posts

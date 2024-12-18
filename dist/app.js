@@ -56,6 +56,7 @@ app.get("/auth/google/callback", async (req, res) => {
     const existingUser = await user_model_1.UserModel.findOne({ email: user.email });
     let userDetails;
     let token;
+    let refreshToken;
     if (existingUser) {
         userDetails = {
             id: existingUser._id,
@@ -71,6 +72,10 @@ app.get("/auth/google/callback", async (req, res) => {
             email: existingUser.email,
             firstName: existingUser.firstName,
             lastName: existingUser.lastName,
+        });
+        refreshToken = await (0, utils_1.generateRefreshToken)({
+            id: existingUser._id,
+            email: existingUser.email,
         });
     }
     else {
@@ -96,8 +101,12 @@ app.get("/auth/google/callback", async (req, res) => {
             firstName: newUser.firstName,
             lastName: newUser.lastName,
         });
+        refreshToken = await (0, utils_1.generateRefreshToken)({
+            id: newUser._id,
+            email: newUser.email,
+        });
     }
-    res.redirect(`https://neew.io/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
+    res.redirect(`https://neew.io/onboarding/auth-step-2?token=${token}&refreshToken=${refreshToken}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
 });
 async function start() {
     await dbInit_1.default.connect();

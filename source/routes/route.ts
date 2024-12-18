@@ -8,14 +8,17 @@ import notificationService from "../services/notification.service";
 import messageInviteService from "../services/messageInvite.service";
 import profileService from "../services/profile.service";
 import newsletterService from "../services/newsletter.service";
+import generalService from "../services/general.service";
 
 const router = express.Router();
+
+router.post("/link-preview", generalService.linkPreview);
 
 router.post("/auth/login", authService.login);
 router.post("/auth/register", authService.register);
 router.post("/auth/reset-password", authService.resetPassword);
 router.post("/auth/check-email", authService.checkEmail);
-
+router.post("/auth/refresh-accessToken", authService.refreshToken);
 
 router.put("/post/edit", postService.edit);
 router.get("/post/:postId", postService.get);

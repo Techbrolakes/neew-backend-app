@@ -12,11 +12,14 @@ const notification_service_1 = __importDefault(require("../services/notification
 const messageInvite_service_1 = __importDefault(require("../services/messageInvite.service"));
 const profile_service_1 = __importDefault(require("../services/profile.service"));
 const newsletter_service_1 = __importDefault(require("../services/newsletter.service"));
+const general_service_1 = __importDefault(require("../services/general.service"));
 const router = express_1.default.Router();
+router.post("/link-preview", general_service_1.default.linkPreview);
 router.post("/auth/login", auth_service_1.default.login);
 router.post("/auth/register", auth_service_1.default.register);
 router.post("/auth/reset-password", auth_service_1.default.resetPassword);
 router.post("/auth/check-email", auth_service_1.default.checkEmail);
+router.post("/auth/refresh-accessToken", auth_service_1.default.refreshToken);
 router.put("/post/edit", post_service_1.default.edit);
 router.get("/post/:postId", post_service_1.default.get);
 router.post("/post/create", post_service_1.default.create);

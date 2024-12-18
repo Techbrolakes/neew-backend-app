@@ -20,7 +20,7 @@ export default async function authMw(req: express.Request, res: express.Response
   }
 
   try {
-    const user = await frontUserUtil.decodeToken(token);
+    const user = await frontUserUtil.decodeAccessToken(token);
 
     if (!user) {
       res.status(401).json({ message: "Invalid user" });

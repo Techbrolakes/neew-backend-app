@@ -21,7 +21,7 @@ const socket = (server) => {
         console.log("connect User ", socket.id);
         const token = socket.handshake.auth.token;
         // current user details
-        const user = await frontUser_utils_1.default.decodeToken(token);
+        const user = await frontUser_utils_1.default.decodeAccessToken(token);
         const userId = user.id.toString();
         // create a room
         socket.join(userId);

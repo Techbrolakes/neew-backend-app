@@ -23,7 +23,7 @@ const socket = (server: http.Server) => {
     const token = socket.handshake.auth.token;
 
     // current user details
-    const user = await frontUserUtils.decodeToken(token);
+    const user = await frontUserUtils.decodeAccessToken(token);
     const userId = user.id.toString();
 
     // create a room

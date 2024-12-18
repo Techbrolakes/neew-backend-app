@@ -11,6 +11,7 @@ import { Types } from "mongoose";
 import { throwIfUndefined } from "../utils";
 import { NotificationModel } from "../models/notification.model";
 import { PostModel } from "../models/post.model";
+import redis from "../init/redisInit";
 
 const debug = Debug("project:post.service");
 
@@ -372,6 +373,13 @@ const create = [
 
           await Promise.all(notifications);
         }
+      }
+
+      // Invalidate all cached post data
+      const keys = await redis.keys("allPosts:*"); // Fetch all matching keys
+      if (keys.length > 0) {
+        await redis.del(keys); // Delete all matching cache keys
+        console.log("Cache invalidated for allPosts");
       }
 
       return ResponseHandler.sendSuccessResponse({

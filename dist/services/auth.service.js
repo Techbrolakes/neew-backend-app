@@ -12,68 +12,8 @@ const appDefaults_constant_1 = require("../constants/appDefaults.constant");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const utils_1 = require("../utils");
 const user_model_1 = require("../models/user.model");
-const google_auth_library_1 = require("google-auth-library");
+const frontUser_utils_1 = __importDefault(require("../utils/frontUser.utils"));
 const debug = (0, debug_1.default)("project:user.service");
-const secretKey = "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";
-const clientId = "617862799460-erkfh2qvd432t4j1p0uqifpgc3pbmpe1.apps.googleusercontent.com";
-const oauth2Client = new google_auth_library_1.OAuth2Client(clientId, secretKey, "http://localhost:9001/api/auth/google/callback");
-const generateGoogleAuthUrl = [
-    async (req, res) => {
-        try {
-            const url = oauth2Client.generateAuthUrl({
-                access_type: "offline",
-                scope: ["profile", "email"],
-                prompt: "select_account",
-            });
-            return response_handler_1.default.sendSuccessResponse({
-                res,
-                code: appDefaults_constant_1.HTTP_CODES.OK,
-                message: "Success",
-                data: { authorizationUrl: url },
-            });
-        }
-        catch (error) {
-            return response_handler_1.default.sendErrorResponse({
-                res,
-                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
-                error: `${error}`,
-            });
-        }
-    },
-];
-const googleCallback = [
-    async (req, res) => {
-        try {
-            const code = req.query.code;
-            // Exchange the authorization code for tokens
-            const { tokens } = await oauth2Client.getToken(code);
-            const accessToken = tokens.access_token;
-            // Fetch user details from Google’s user info endpoint
-            // Fetch user details from Google’s user info endpoint using Fetch API
-            const userInfoResponse = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-            if (!userInfoResponse.ok) {
-                throw new Error(`Failed to fetch user info: ${userInfoResponse.statusText}`);
-            }
-            const user = await userInfoResponse.json();
-            console.log("user", user);
-            console.log("tokens", tokens);
-            console.log("tokens", tokens);
-            res.redirect(`http://localhost:3000?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`);
-            res.json({ message: "Google callback", tokens });
-        }
-        catch (error) {
-            return response_handler_1.default.sendErrorResponse({
-                res,
-                code: appDefaults_constant_1.HTTP_CODES.INTERNAL_SERVER_ERROR,
-                error: `${error}`,
-            });
-        }
-    },
-];
 const login = [
     (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email"),
     (0, express_validator_1.body)("password").isString().exists().withMessage("Invalid password"),
@@ -110,11 +50,16 @@ const login = [
                 firstName: user.firstName,
                 lastName: user.lastName,
             });
+            const refreshToken = await (0, utils_1.generateRefreshToken)({
+                id: user._id,
+                email: user.email,
+            });
+            await user_model_1.UserModel.findOneAndUpdate({ email: req.body.email }, { $set: { refreshToken } }, { new: true });
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
                 message: "Login successful",
-                data: { ...user, token },
+                data: { ...user, token, refreshToken },
             });
         }
         catch (error) {
@@ -164,11 +109,16 @@ const register = [
                 lastName: user.lastName,
                 userId: user._id,
             });
+            const refreshToken = await (0, utils_1.generateRefreshToken)({
+                id: user._id,
+                email: user.email,
+            });
+            await user_model_1.UserModel.findOneAndUpdate({ email: req.body.email }, { $set: { refreshToken } }, { new: true });
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.CREATED,
                 message: "User created",
-                data: { user, token },
+                data: { user, token, refreshToken },
             });
         }
         catch (error) {
@@ -248,12 +198,65 @@ const checkEmail = [
         }
     },
 ];
+const refreshToken = [
+    (0, express_validator_1.body)("refreshToken").isString().withMessage("Refresh token is required"),
+    validator_mw_1.validateResult,
+    async (req, res) => {
+        try {
+            const { refreshToken } = req.body;
+            const decoded = await frontUser_utils_1.default.decodeRefreshToken(refreshToken);
+            // Find user by ID
+            const user = await user_model_1.UserModel.findById(decoded.id);
+            if (!user) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.UNAUTHORIZED,
+                    error: "Invalid refresh token",
+                });
+            }
+            // Check if refresh tokens match
+            if (user.refreshToken !== refreshToken) {
+                return response_handler_1.default.sendErrorResponse({
+                    res,
+                    code: appDefaults_constant_1.HTTP_CODES.UNAUTHORIZED,
+                    error: "Invalid refresh token",
+                });
+            }
+            // Generate new access token
+            const newAccessToken = await (0, utils_1.generateToken)({
+                id: user._id,
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+            });
+            // Optionally rotate refresh token
+            const newRefreshToken = await (0, utils_1.generateRefreshToken)({ id: user._id, email: user.email });
+            user.refreshToken = newRefreshToken; // rotate the token
+            await user.save();
+            return response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.OK,
+                message: "Token refreshed",
+                data: {
+                    token: newAccessToken,
+                    refreshToken: newRefreshToken,
+                },
+            });
+        }
+        catch (error) {
+            return response_handler_1.default.sendErrorResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.UNAUTHORIZED,
+                error: "Invalid or expired refresh token",
+            });
+        }
+    },
+];
 exports.default = {
     register,
     login,
     resetPassword,
     checkEmail,
-    generateGoogleAuthUrl,
-    googleCallback,
+    refreshToken,
 };
 //# sourceMappingURL=auth.service.js.map

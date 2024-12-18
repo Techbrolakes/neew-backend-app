@@ -3,9 +3,39 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertDate = exports.timeUtil = exports.paginationUtil = exports.searchUtil = exports.generateToken = exports.throwIfUndefined = void 0;
-const debug_1 = __importDefault(require("debug"));
+exports.convertDate = exports.timeUtil = exports.paginationUtil = exports.searchUtil = exports.generateRefreshToken = exports.generateToken = exports.REFRESH_TOKEN_SECRET = exports.ACCESS_TOKEN_SECRET = exports.throwIfUndefined = exports.getCachedResponse = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const response_handler_1 = __importDefault(require("../utils/response-handler"));
+const appDefaults_constant_1 = require("../constants/appDefaults.constant");
+const redisInit_1 = __importDefault(require("../init/redisInit"));
+/**
+ * @param {string} cacheKey - The Redis key to check.
+ * @param {Response} res - Express response object.
+ * @param {string} successMessage - Message to send on success.
+ * @returns {Promise<any | null>} - Returns cached data if found, otherwise null.
+ */
+async function getCachedResponse(cacheKey, res, successMessage) {
+    try {
+        const cachedData = await redisInit_1.default.get(cacheKey);
+        console.log("cachedData", cachedData);
+        if (cachedData) {
+            const result = JSON.parse(cachedData);
+            response_handler_1.default.sendSuccessResponse({
+                res,
+                code: appDefaults_constant_1.HTTP_CODES.OK,
+                message: successMessage,
+                data: result,
+            });
+            return result;
+        }
+        return null;
+    }
+    catch (error) {
+        console.error(`Redis error for key ${cacheKey}:`, error.message);
+        return null;
+    }
+}
+exports.getCachedResponse = getCachedResponse;
 // Objective: Implement utility functions for the application
 function throwIfUndefined(x, name) {
     if (x === undefined) {
@@ -15,20 +45,36 @@ function throwIfUndefined(x, name) {
 }
 exports.throwIfUndefined = throwIfUndefined;
 // =====================================================================================================
-/** Generate and sign a user Token */
+exports.ACCESS_TOKEN_SECRET = "neew.@#KSJ1a@js"; // Ideally from env vars
+exports.REFRESH_TOKEN_SECRET = "refresh.@#KSJ1a@js"; // Different secret for refresh tokens
 async function generateToken(data) {
-    return new Promise((resolve, _reject) => {
-        const signOptions = {};
-        signOptions.expiresIn = 30 * 60;
-        jsonwebtoken_1.default.sign(data, "neew.@#KSJ1a@js", signOptions, (err, token) => {
+    return new Promise((resolve, reject) => {
+        const signOptions = {
+            expiresIn: 30 * 60, // 30 minutes
+        };
+        jsonwebtoken_1.default.sign(data, exports.ACCESS_TOKEN_SECRET, signOptions, (err, token) => {
             if (err) {
-                (0, debug_1.default)(err.message);
+                return reject(err);
             }
             resolve(token);
         });
     });
 }
 exports.generateToken = generateToken;
+async function generateRefreshToken(data) {
+    return new Promise((resolve, reject) => {
+        const signOptions = {
+            expiresIn: 24 * 60 * 60,
+        };
+        jsonwebtoken_1.default.sign(data, exports.REFRESH_TOKEN_SECRET, signOptions, (err, token) => {
+            if (err) {
+                return reject(err);
+            }
+            resolve(token);
+        });
+    });
+}
+exports.generateRefreshToken = generateRefreshToken;
 function searchUtil({ search, searchArray }) {
     let searchQuery;
     if (search !== "undefined" && Object.keys(search).length > 0) {

@@ -1,9 +1,13 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const post_model_1 = require("../models/post.model");
 const user_model_1 = require("../models/user.model");
 const notification_model_1 = require("../models/notification.model");
 const utils_1 = require("../utils");
+const redisInit_1 = __importDefault(require("../init/redisInit"));
 // Function to get post likes by post ID
 async function getLikesUsers(postId) {
     const post = await post_model_1.PostModel.findById(postId);
@@ -86,21 +90,40 @@ async function getAllPosts(req) {
     const { query } = req;
     const perpage = Number(query.perpage) || 200;
     const page = Number(query.page) || 1;
-    const [posts, total] = await Promise.all([
-        post_model_1.PostModel.find()
-            .sort({ createdAt: -1 })
-            .populate("creator", "firstName lastName photo persona")
-            .populate("mentions", "firstName lastName")
-            .limit(perpage)
-            .skip(page * perpage - perpage)
-            .lean(),
-        post_model_1.PostModel.countDocuments(),
-    ]);
-    const pagination = await (0, utils_1.paginationUtil)({ total, page, perpage });
-    return {
-        data: posts,
-        pagination,
-    };
+    // Generate a unique cache key based on pagination
+    const cacheKey = `allPosts:page:${page}:perpage:${perpage}`;
+    try {
+        // Step 1: Check Redis Cache
+        const cachedData = await redisInit_1.default.get(cacheKey);
+        if (cachedData) {
+            console.log("Cache hit!");
+            return JSON.parse(cachedData);
+        }
+        console.log("Cache miss! Fetching from database...");
+        // Step 2: Fetch data from MongoDB
+        const [posts, total] = await Promise.all([
+            post_model_1.PostModel.find()
+                .sort({ createdAt: -1 })
+                .populate("creator", "firstName lastName photo persona")
+                .populate("mentions", "firstName lastName")
+                .limit(perpage)
+                .skip(page * perpage - perpage)
+                .lean(),
+            post_model_1.PostModel.countDocuments(),
+        ]);
+        const pagination = await (0, utils_1.paginationUtil)({ total, page, perpage });
+        const result = {
+            data: posts,
+            pagination,
+        };
+        // Step 3: Cache the result in Redis
+        await redisInit_1.default.setex(cacheKey, 3600, JSON.stringify(result)); // Cache for 1 hour
+        return result;
+    }
+    catch (error) {
+        console.error("Error fetching posts:", error);
+        throw new Error("Unable to fetch posts");
+    }
 }
 // Function that lists all user posts
 async function find(req, userId) {

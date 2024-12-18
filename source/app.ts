@@ -11,7 +11,7 @@ import { OAuth2Client } from "google-auth-library";
 import ResponseHandler from "./utils/response-handler";
 import { HTTP_CODES } from "./constants/appDefaults.constant";
 import { UserModel } from "./models/user.model";
-import { generateToken } from "./utils";
+import { generateRefreshToken, generateToken } from "./utils";
 import cors from "cors";
 import config from "./utils/config";
 
@@ -61,6 +61,7 @@ app.get("/auth/google/callback", async (req, res) => {
 
   let userDetails;
   let token;
+  let refreshToken;
 
   if (existingUser) {
     userDetails = {
@@ -78,6 +79,11 @@ app.get("/auth/google/callback", async (req, res) => {
       email: existingUser.email,
       firstName: existingUser.firstName,
       lastName: existingUser.lastName,
+    });
+
+    refreshToken = await generateRefreshToken({
+      id: existingUser._id,
+      email: existingUser.email,
     });
   } else {
     const newUser: any = await UserModel.create({
@@ -104,8 +110,15 @@ app.get("/auth/google/callback", async (req, res) => {
       firstName: newUser.firstName,
       lastName: newUser.lastName,
     });
+
+    refreshToken = await generateRefreshToken({
+      id: newUser._id,
+      email: newUser.email,
+    });
   }
-  res.redirect(`https://neew.io/onboarding/auth-step-2?token=${token}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
+  res.redirect(
+    `https://neew.io/onboarding/auth-step-2?token=${token}&refreshToken=${refreshToken}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`,
+  );
 });
 
 async function start() {

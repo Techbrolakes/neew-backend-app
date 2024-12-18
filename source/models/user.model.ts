@@ -40,6 +40,7 @@ export interface IUser {
   online?: boolean; // Add this field
   provider: AuthProvider;
   provider_id: string;
+  refreshToken?: string;
 }
 
 const UserSchema = new mongoose.Schema(
@@ -93,6 +94,7 @@ const UserSchema = new mongoose.Schema(
     provider_id: {
       type: String,
     },
+    refreshToken: { type: String },
   },
   { timestamps: true },
 );

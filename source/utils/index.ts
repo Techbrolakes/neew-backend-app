@@ -1,5 +1,40 @@
 import debug from "debug";
 import jwt from "jsonwebtoken";
+import { Response } from "express";
+import ResponseHandler from "../utils/response-handler";
+import { HTTP_CODES } from "../constants/appDefaults.constant";
+import redis from "../init/redisInit";
+
+/**
+ * @param {string} cacheKey - The Redis key to check.
+ * @param {Response} res - Express response object.
+ * @param {string} successMessage - Message to send on success.
+ * @returns {Promise<any | null>} - Returns cached data if found, otherwise null.
+ */
+
+export async function getCachedResponse(cacheKey: string, res: Response, successMessage: string): Promise<any | null> {
+  try {
+    const cachedData = await redis.get(cacheKey);
+
+    console.log("cachedData", cachedData);
+
+    if (cachedData) {
+      const result = JSON.parse(cachedData);
+      ResponseHandler.sendSuccessResponse({
+        res,
+        code: HTTP_CODES.OK,
+        message: successMessage,
+        data: result,
+      });
+
+      return result;
+    }
+    return null;
+  } catch (error) {
+    console.error(`Redis error for key ${cacheKey}:`, error.message);
+    return null;
+  }
+}
 
 // Objective: Implement utility functions for the application
 
@@ -11,22 +46,38 @@ export function throwIfUndefined<T>(x: T | undefined, name?: string): T {
 }
 
 // =====================================================================================================
-/** Generate and sign a user Token */
-export async function generateToken(data: any) {
-  return new Promise((resolve, _reject) => {
-    const signOptions: any = {};
-    signOptions.expiresIn = 30 * 60;
+export const ACCESS_TOKEN_SECRET = "neew.@#KSJ1a@js"; // Ideally from env vars
+export const REFRESH_TOKEN_SECRET = "refresh.@#KSJ1a@js"; // Different secret for refresh tokens
 
-    jwt.sign(data, "neew.@#KSJ1a@js", signOptions, (err: any, token: any) => {
+export async function generateToken(data: any): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const signOptions = {
+      expiresIn: 30 * 60, // 30 minutes
+    };
+
+    jwt.sign(data, ACCESS_TOKEN_SECRET, signOptions, (err, token) => {
       if (err) {
-        debug(err.message);
+        return reject(err);
       }
-
-      resolve(token);
+      resolve(token!);
     });
   });
 }
 
+export async function generateRefreshToken(data: any): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const signOptions = {
+      expiresIn: 24 * 60 * 60,
+    };
+
+    jwt.sign(data, REFRESH_TOKEN_SECRET, signOptions, (err, token) => {
+      if (err) {
+        return reject(err);
+      }
+      resolve(token!);
+    });
+  });
+}
 // =====================================================================================================
 type searchUtilType = {
   search: string;

@@ -19,7 +19,7 @@ async function authMw(req, res, next) {
         });
     }
     try {
-        const user = await frontUser_utils_1.default.decodeToken(token);
+        const user = await frontUser_utils_1.default.decodeAccessToken(token);
         if (!user) {
             res.status(401).json({ message: "Invalid user" });
             return;

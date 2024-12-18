@@ -60,6 +60,7 @@ const UserSchema = new mongoose_1.default.Schema({
     provider_id: {
         type: String,
     },
+    refreshToken: { type: String },
 }, { timestamps: true });
 UserSchema.index({ email: 1 });
 // A model type extending the mongoose Model interface
