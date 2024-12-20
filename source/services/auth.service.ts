@@ -251,6 +251,7 @@ const refreshToken = [
       const decodedAccessToken: any = await frontUserUtil.decodeAccessToken(accessToken);
 
       let newAccessToken = accessToken;
+      let newRefreshToken = refreshToken;
 
       // Check if access token has expired
       const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
@@ -264,10 +265,16 @@ const refreshToken = [
         });
       }
 
-      // Optionally rotate refresh token
-      const newRefreshToken = await generateRefreshToken({ id: user._id, email: user.email });
-      user.refreshToken = newRefreshToken; // rotate the token
-      await user.save();
+      // Check if refresh token has expired
+      if (decodedRefreshToken.exp < currentTime) {
+        // Generate a new refresh token if expired
+        newRefreshToken = await generateRefreshToken({
+          id: user._id,
+          email: user.email,
+        });
+        user.refreshToken = newRefreshToken; // Rotate the refresh token
+        await user.save();
+      }
 
       return ResponseHandler.sendSuccessResponse({
         res,
@@ -282,7 +289,7 @@ const refreshToken = [
       return ResponseHandler.sendErrorResponse({
         res,
         code: HTTP_CODES.UNAUTHORIZED,
-        error: "Invalid or expired refresh token",
+        error: "Invalid or expired tokens",
       });
     }
   },
