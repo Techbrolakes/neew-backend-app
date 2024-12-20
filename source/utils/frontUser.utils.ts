@@ -12,6 +12,14 @@ export interface LocalTokenPayload {
   lastName: string;
 }
 
+const signToken = (payload: any, options: any) => {
+  return jwt.sign(payload, process.env.JWT_SECRET, options);
+};
+
+const decodeAccessTokenWithoutValidation = (token: any) => {
+  return jwt.decode(token); // Decode without verification
+};
+
 export function decodeAccessToken(token: string) {
   return new Promise<LocalTokenPayload>((resolve, reject) => {
     jwt.verify(token, "neew.@#KSJ1a@js", (error, decoded) => {
@@ -36,6 +44,8 @@ function decodeRefreshToken(token: string): Promise<any> {
 const frontUserUtil = {
   decodeAccessToken,
   decodeRefreshToken,
+  signToken,
+  decodeAccessTokenWithoutValidation,
 };
 
 export default frontUserUtil;

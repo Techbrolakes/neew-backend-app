@@ -219,14 +219,17 @@ const checkEmail = [
 
 const refreshToken = [
   body("refreshToken").isString().withMessage("Refresh token is required"),
+  body("accessToken").isString().withMessage("Access token is required"),
   validateResult,
   async (req: express.Request, res: express.Response) => {
     try {
-      const { refreshToken } = req.body;
-      const decoded = await frontUserUtil.decodeRefreshToken(refreshToken);
+      const { refreshToken, accessToken } = req.body;
+
+      // Decode the refresh token
+      const decodedRefreshToken = await frontUserUtil.decodeRefreshToken(refreshToken);
 
       // Find user by ID
-      const user = await UserModel.findById(decoded.id);
+      const user = await UserModel.findById(decodedRefreshToken.id);
       if (!user) {
         return ResponseHandler.sendErrorResponse({
           res,
@@ -244,13 +247,22 @@ const refreshToken = [
         });
       }
 
-      // Generate new access token
-      const newAccessToken = await generateToken({
-        id: user._id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      });
+      // Decode the access token
+      const decodedAccessToken: any = await frontUserUtil.decodeAccessToken(accessToken);
+
+      let newAccessToken = accessToken;
+
+      // Check if access token has expired
+      const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+      if (decodedAccessToken.exp < currentTime) {
+        // Generate a new access token if expired
+        newAccessToken = await generateToken({
+          id: user._id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        });
+      }
 
       // Optionally rotate refresh token
       const newRefreshToken = await generateRefreshToken({ id: user._id, email: user.email });

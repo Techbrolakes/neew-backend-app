@@ -200,13 +200,15 @@ const checkEmail = [
 ];
 const refreshToken = [
     (0, express_validator_1.body)("refreshToken").isString().withMessage("Refresh token is required"),
+    (0, express_validator_1.body)("accessToken").isString().withMessage("Access token is required"),
     validator_mw_1.validateResult,
     async (req, res) => {
         try {
-            const { refreshToken } = req.body;
-            const decoded = await frontUser_utils_1.default.decodeRefreshToken(refreshToken);
+            const { refreshToken, accessToken } = req.body;
+            // Decode the refresh token
+            const decodedRefreshToken = await frontUser_utils_1.default.decodeRefreshToken(refreshToken);
             // Find user by ID
-            const user = await user_model_1.UserModel.findById(decoded.id);
+            const user = await user_model_1.UserModel.findById(decodedRefreshToken.id);
             if (!user) {
                 return response_handler_1.default.sendErrorResponse({
                     res,
@@ -222,13 +224,20 @@ const refreshToken = [
                     error: "Invalid refresh token",
                 });
             }
-            // Generate new access token
-            const newAccessToken = await (0, utils_1.generateToken)({
-                id: user._id,
-                email: user.email,
-                firstName: user.firstName,
-                lastName: user.lastName,
-            });
+            // Decode the access token
+            const decodedAccessToken = await frontUser_utils_1.default.decodeAccessToken(accessToken);
+            let newAccessToken = accessToken;
+            // Check if access token has expired
+            const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
+            if (decodedAccessToken.exp < currentTime) {
+                // Generate a new access token if expired
+                newAccessToken = await (0, utils_1.generateToken)({
+                    id: user._id,
+                    email: user.email,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                });
+            }
             // Optionally rotate refresh token
             const newRefreshToken = await (0, utils_1.generateRefreshToken)({ id: user._id, email: user.email });
             user.refreshToken = newRefreshToken; // rotate the token

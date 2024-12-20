@@ -9,6 +9,12 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const _1 = require(".");
 // eslint-disable-next-line
 const debug = (0, debug_1.default)("project:frontUser.util");
+const signToken = (payload, options) => {
+    return jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, options);
+};
+const decodeAccessTokenWithoutValidation = (token) => {
+    return jsonwebtoken_1.default.decode(token); // Decode without verification
+};
 function decodeAccessToken(token) {
     return new Promise((resolve, reject) => {
         jsonwebtoken_1.default.verify(token, "neew.@#KSJ1a@js", (error, decoded) => {
@@ -33,6 +39,8 @@ function decodeRefreshToken(token) {
 const frontUserUtil = {
     decodeAccessToken,
     decodeRefreshToken,
+    signToken,
+    decodeAccessTokenWithoutValidation,
 };
 exports.default = frontUserUtil;
 //# sourceMappingURL=frontUser.utils.js.map
