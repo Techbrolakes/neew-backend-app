@@ -5,7 +5,6 @@ import { IPostDocument } from "../models/post.model";
 import { FilterQuery, Types } from "mongoose";
 import express from "express";
 import { paginationUtil } from "../utils";
-import redis from "../init/redisInit";
 
 // Function to get post likes by post ID
 async function getLikesUsers(postId: Types.ObjectId): Promise<IPostDocument | any | null> {
@@ -136,16 +135,6 @@ async function getAllPosts(req: express.Request): Promise<any> {
   const cacheKey = `allPosts:page:${page}:perpage:${perpage}`;
 
   try {
-    // Step 1: Check Redis Cache
-    const cachedData = await redis.get(cacheKey);
-    if (cachedData) {
-      console.log("Cache hit!");
-      return JSON.parse(cachedData);
-    }
-
-    console.log("Cache miss! Fetching from database...");
-
-    // Step 2: Fetch data from MongoDB
     const [posts, total] = await Promise.all([
       PostModel.find()
         .sort({ createdAt: -1 })
@@ -164,9 +153,6 @@ async function getAllPosts(req: express.Request): Promise<any> {
       data: posts,
       pagination,
     };
-
-    // Step 3: Cache the result in Redis
-    await redis.setex(cacheKey, 3600, JSON.stringify(result)); // Cache for 1 hour
 
     return result;
   } catch (error) {
