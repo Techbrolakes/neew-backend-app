@@ -69,6 +69,12 @@ const replyComment = [
             });
             // Update the post document in the database
             await post_model_1.PostModel.updateOne({ _id: req.body.postId }, { $set: { comments: post.comments } });
+            // Invalidate all cached post data
+            const keys = await redisInit_1.default.keys("allPosts:*"); // Fetch all matching keys
+            if (keys.length > 0) {
+                await redisInit_1.default.del(keys); // Delete all matching cache keys
+                console.log("Cache invalidated for allPosts");
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.CREATED,
@@ -92,6 +98,12 @@ const getLikesUsers = [
         try {
             (0, utils_1.throwIfUndefined)(req.user, "req.user");
             const likeUsers = await post_core_1.default.getLikesUsers(new mongoose_1.Types.ObjectId(req.params.postId));
+            // Invalidate all cached post data
+            const keys = await redisInit_1.default.keys("allPosts:*"); // Fetch all matching keys
+            if (keys.length > 0) {
+                await redisInit_1.default.del(keys); // Delete all matching cache keys
+                console.log("Cache invalidated for allPosts");
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
@@ -128,6 +140,12 @@ const addLike = [
                 postId,
                 userId: new mongoose_1.Types.ObjectId(user.id),
             });
+            // Invalidate all cached post data
+            const keys = await redisInit_1.default.keys("allPosts:*"); // Fetch all matching keys
+            if (keys.length > 0) {
+                await redisInit_1.default.del(keys); // Delete all matching cache keys
+                console.log("Cache invalidated for allPosts");
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.CREATED,
@@ -159,6 +177,12 @@ const deletePost = [
                 });
             }
             await post_core_1.default.deletePost(new mongoose_1.Types.ObjectId(req.params.postId));
+            // Invalidate all cached post data
+            const keys = await redisInit_1.default.keys("allPosts:*"); // Fetch all matching keys
+            if (keys.length > 0) {
+                await redisInit_1.default.del(keys); // Delete all matching cache keys
+                console.log("Cache invalidated for allPosts");
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
@@ -198,6 +222,12 @@ const edit = [
                 image: req.body.image,
                 mentions: req.body.mentions,
             });
+            // Invalidate all cached post data
+            const keys = await redisInit_1.default.keys("allPosts:*"); // Fetch all matching keys
+            if (keys.length > 0) {
+                await redisInit_1.default.del(keys); // Delete all matching cache keys
+                console.log("Cache invalidated for allPosts");
+            }
             return response_handler_1.default.sendSuccessResponse({
                 res,
                 code: appDefaults_constant_1.HTTP_CODES.OK,
@@ -258,6 +288,12 @@ const addComment = [
                     });
                     await Promise.all(notifications);
                 }
+            }
+            // Invalidate all cached post data
+            const keys = await redisInit_1.default.keys("allPosts:*"); // Fetch all matching keys
+            if (keys.length > 0) {
+                await redisInit_1.default.del(keys); // Delete all matching cache keys
+                console.log("Cache invalidated for allPosts");
             }
             return response_handler_1.default.sendSuccessResponse({
                 res,

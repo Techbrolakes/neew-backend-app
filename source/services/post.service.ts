@@ -77,6 +77,13 @@ const replyComment = [
       // Update the post document in the database
       await PostModel.updateOne({ _id: req.body.postId }, { $set: { comments: post.comments } });
 
+      // Invalidate all cached post data
+      const keys = await redis.keys("allPosts:*"); // Fetch all matching keys
+      if (keys.length > 0) {
+        await redis.del(keys); // Delete all matching cache keys
+        console.log("Cache invalidated for allPosts");
+      }
+
       return ResponseHandler.sendSuccessResponse({
         res,
         code: HTTP_CODES.CREATED,
@@ -101,6 +108,13 @@ const getLikesUsers = [
       throwIfUndefined(req.user, "req.user");
 
       const likeUsers = await PostCore.getLikesUsers(new Types.ObjectId(req.params.postId));
+
+      // Invalidate all cached post data
+      const keys = await redis.keys("allPosts:*"); // Fetch all matching keys
+      if (keys.length > 0) {
+        await redis.del(keys); // Delete all matching cache keys
+        console.log("Cache invalidated for allPosts");
+      }
 
       return ResponseHandler.sendSuccessResponse({
         res,
@@ -142,6 +156,13 @@ const addLike = [
         userId: new Types.ObjectId(user.id),
       });
 
+      // Invalidate all cached post data
+      const keys = await redis.keys("allPosts:*"); // Fetch all matching keys
+      if (keys.length > 0) {
+        await redis.del(keys); // Delete all matching cache keys
+        console.log("Cache invalidated for allPosts");
+      }
+
       return ResponseHandler.sendSuccessResponse({
         res,
         code: HTTP_CODES.CREATED,
@@ -176,6 +197,13 @@ const deletePost = [
       }
 
       await PostCore.deletePost(new Types.ObjectId(req.params.postId));
+
+      // Invalidate all cached post data
+      const keys = await redis.keys("allPosts:*"); // Fetch all matching keys
+      if (keys.length > 0) {
+        await redis.del(keys); // Delete all matching cache keys
+        console.log("Cache invalidated for allPosts");
+      }
 
       return ResponseHandler.sendSuccessResponse({
         res,
@@ -219,6 +247,13 @@ const edit = [
         image: req.body.image,
         mentions: req.body.mentions,
       });
+
+      // Invalidate all cached post data
+      const keys = await redis.keys("allPosts:*"); // Fetch all matching keys
+      if (keys.length > 0) {
+        await redis.del(keys); // Delete all matching cache keys
+        console.log("Cache invalidated for allPosts");
+      }
 
       return ResponseHandler.sendSuccessResponse({
         res,
@@ -287,6 +322,13 @@ const addComment = [
 
           await Promise.all(notifications);
         }
+      }
+
+      // Invalidate all cached post data
+      const keys = await redis.keys("allPosts:*"); // Fetch all matching keys
+      if (keys.length > 0) {
+        await redis.del(keys); // Delete all matching cache keys
+        console.log("Cache invalidated for allPosts");
       }
 
       return ResponseHandler.sendSuccessResponse({
