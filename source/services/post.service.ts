@@ -11,7 +11,6 @@ import { Types } from "mongoose";
 import { throwIfUndefined } from "../utils";
 import { NotificationModel } from "../models/notification.model";
 import { PostModel } from "../models/post.model";
-import redis from "../init/redisInit";
 
 const debug = Debug("project:post.service");
 

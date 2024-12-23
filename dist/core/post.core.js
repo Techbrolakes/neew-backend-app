@@ -41,7 +41,7 @@ async function edit({ postId, content, image, mentions }) {
     post.content = content;
     post.image = image;
     post.mentions = mentions;
-    return post.save();
+    return await post.save();
 }
 async function addComment({ postId, comment, userId, mentions }) {
     const post = await post_model_1.PostModel.findById(postId);

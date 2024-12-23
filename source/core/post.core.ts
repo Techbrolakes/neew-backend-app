@@ -67,7 +67,7 @@ async function edit({ postId, content, image, mentions }: EditPost): Promise<IPo
   post.image = image;
   post.mentions = mentions;
 
-  return post.save();
+  return await post.save();
 }
 
 // Function to addComment to a post
