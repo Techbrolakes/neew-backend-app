@@ -122,7 +122,7 @@ app.get("/auth/google/callback", async (req, res) => {
   }
 
   res.redirect(
-    `http://localhost:3000/onboarding/auth-step-2?token=${token}&refreshToken=${refreshToken}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`,
+    `https://neew.io/onboarding/auth-step-2?token=${token}&refreshToken=${refreshToken}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`,
   );
 });
 
