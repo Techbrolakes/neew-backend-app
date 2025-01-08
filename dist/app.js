@@ -108,7 +108,7 @@ app.get("/auth/google/callback", async (req, res) => {
         });
         await user_model_1.UserModel.findOneAndUpdate({ email: newUser.email }, { $set: { refreshToken } }, { new: true });
     }
-    res.redirect(`http://localhost:3000/onboarding/auth-step-2?token=${token}&refreshToken=${refreshToken}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
+    res.redirect(`https://neew.io/onboarding/auth-step-2?token=${token}&refreshToken=${refreshToken}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`);
 });
 async function start() {
     await dbInit_1.default.connect();
