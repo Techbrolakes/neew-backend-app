@@ -85,6 +85,8 @@ app.get("/auth/google/callback", async (req, res) => {
       id: existingUser._id,
       email: existingUser.email,
     });
+
+    await UserModel.findOneAndUpdate({ email: existingUser.email }, { $set: { refreshToken } }, { new: true });
   } else {
     const newUser: any = await UserModel.create({
       firstName: user.given_name,
@@ -115,7 +117,10 @@ app.get("/auth/google/callback", async (req, res) => {
       id: newUser._id,
       email: newUser.email,
     });
+
+    await UserModel.findOneAndUpdate({ email: newUser.email }, { $set: { refreshToken } }, { new: true });
   }
+
   res.redirect(
     `http://localhost:3000/onboarding/auth-step-2?token=${token}&refreshToken=${refreshToken}&planId=NmdEOxQ0&user=${JSON.stringify(userDetails)}`,
   );
